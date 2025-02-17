@@ -1,19 +1,18 @@
 {
-    "name": "LedManager",
+    "name": "Clickable",
     "version": "1.0.0",
     "description": "A Library designed to provide a easy to use interface for woking with LEDs",
     "keywords": "Light, Darkness, Efficiency",
     "authors":
     [
       {
-        "name": "Huntrese",
-        "email": "vlad.polisciuc@isa.utm.md",
-        "url": "https://www.linkedin.com/in/vlad-polisciuc-8508a9247/"
+        "name": "vmm-mmv",
+        "email": "mihai.vieru@isa.utm.md",
+        "url": "https://www.linkedin.com/in/vieru-mihai"
       }
     ],
     "dependencies": {
-      "Logger": "^1.0.0", 
-      "List": "^1.0.0"
+      "Logger": "^1.0.0"
     },
     "license": "MIT",
     "frameworks": "arduino",
