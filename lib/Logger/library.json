@@ -1,0 +1,17 @@
+{
+    "name": "Logger",
+    "version": "1.0.0",
+    "description": "A Logger module that does nothing more than printing thigns to the console",
+    "keywords": "Light, Darkness, Efficiency",
+    "authors":
+    [
+      {
+        "name": "Huntrese",
+        "email": "vlad.polisciuc@isa.utm.md",
+        "url": "https://www.linkedin.com/in/vlad-polisciuc-8508a9247/"
+      }
+    ],
+    "license": "MIT",
+    "frameworks": "arduino",
+    "platforms": "atmelavr"
+  }
