@@ -1,8 +1,6 @@
 #include "Led.h"
 #include <Arduino.h>
 
-#include "Led.h"
-
 Led::Led(int pin) : pin(pin) {}
 
 Led::~Led() {}

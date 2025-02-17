@@ -1,6 +1,10 @@
-#include "Clickable.h"
+#include "Button.h"
 #include <Arduino.h>
 
-bool isClicked(int pin) {
-    return digitalRead(pin);
+Button::Button(int pin) : pin(pin) {}
+
+Button::~Button() {}
+
+bool Button::isClicked() {
+    return !digitalRead(pin);
 }
