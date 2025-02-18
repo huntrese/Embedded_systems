@@ -1,41 +1,61 @@
 #include "io.h"
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <Arduino.h>
 
-String io::input() {
-    String input = "";
-    char ch;
-
-    while (true) {
-        if (Serial.available()) {
-            ch = Serial.read();
-
-            if (ch == '\n') break; // Stop on Enter
-            
-            if (ch == '\b' || ch == 127) { // Handle Backspace (127 is DEL key)
-                if (input.length() > 0) {
-                    input.remove(input.length() - 1);
-                    Serial.print("\b \b"); // Erase character in Serial Monitor
-                }
-            } else {
-                input += ch;
-                Serial.print(ch);
-            }
-        }
+// Trim leading and trailing spaces from a string
+void io::trim(char *str) {
+    // Trim trailing spaces
+    int i = strlen(str) - 1;
+    while (i >= 0 && isspace((unsigned char)str[i])) {
+        str[i--] = '\0';
     }
-    Serial.print("\n");
 
-    input.trim();
-    return input;
+    // Trim leading spaces
+    char *start = str;
+    while (isspace((unsigned char)*start)) {
+        start++;
+    }
+    memmove(str, start, strlen(start) + 1);
 }
 
+// Write a character to the serial port
+int io::serial_putchar(char c, FILE* f) {
+    Serial.write(c);
+    return 0;
+}
 
-// String scanff() {
-//     String input = "";
-//     while (!Serial.available()) {
-//         // Wait for input
-//     }
+// Read a character from the serial port
+int io::serial_getchar(FILE* f) {
+    while (Serial.available() <= 0); // Wait for input
+    return Serial.read();
+}
 
-//     input = Serial.readStringUntil('\n');
-//     input.trim();  // Remove any trailing newline or spaces
+// Initialize serial communication
+void io::init() {
+    // Set up stdin and stdout for serial communication
+    FILE* serial_stream = fdevopen(&serial_putchar, &serial_getchar);
+    stdin = stdout = serial_stream;
+}
 
-//     return input;  // Return the input as a string
-// }
+// Read a line of input from the serial port
+char* io::input() {
+    char* input = (char*)malloc(100 * sizeof(char)); // Dynamically allocate memory
+    if (input == NULL) {
+        return NULL; // Handle allocation failure
+    }
+
+    int i = 0;
+    char c;
+
+    // Read characters until newline, EOF, or buffer is full
+    while ((c = getchar()) != '\n' && c != EOF && i < 99) {
+        putchar(c); // Echo the character back
+        input[i++] = c;
+    }
+    input[i] = '\0'; // Null-terminate the string
+
+    trim(input); // Trim leading and trailing spaces
+    return input;
+}
