@@ -4,15 +4,27 @@
 #include <ctype.h>
 #include <Arduino.h>
 
-// Trim leading and trailing spaces from a string
+int io::serial_putchar(char c, FILE* f) {
+    Serial.write(c);
+    return 0;
+}
+
+int io::serial_getchar(FILE* f) {
+    while (Serial.available() <= 0);
+    return Serial.read();
+}
+
+void io::init() {
+    FILE* serial_stream = fdevopen(&serial_putchar, &serial_getchar);
+    stdin = stdout = serial_stream;
+}
+
 void io::trim(char *str) {
-    // Trim trailing spaces
     int i = strlen(str) - 1;
     while (i >= 0 && isspace((unsigned char)str[i])) {
         str[i--] = '\0';
     }
 
-    // Trim leading spaces
     char *start = str;
     while (isspace((unsigned char)*start)) {
         start++;
@@ -20,42 +32,26 @@ void io::trim(char *str) {
     memmove(str, start, strlen(start) + 1);
 }
 
-// Write a character to the serial port
-int io::serial_putchar(char c, FILE* f) {
-    Serial.write(c);
-    return 0;
-}
-
-// Read a character from the serial port
-int io::serial_getchar(FILE* f) {
-    while (Serial.available() <= 0); // Wait for input
-    return Serial.read();
-}
-
-// Initialize serial communication
-void io::init() {
-    // Set up stdin and stdout for serial communication
-    FILE* serial_stream = fdevopen(&serial_putchar, &serial_getchar);
-    stdin = stdout = serial_stream;
-}
-
-// Read a line of input from the serial port
 char* io::input() {
-    char* input = (char*)malloc(100 * sizeof(char)); // Dynamically allocate memory
+    static char input[100];
     if (input == NULL) {
-        return NULL; // Handle allocation failure
+        return NULL;
     }
 
+    char c = 0;
     int i = 0;
-    char c;
 
-    // Read characters until newline, EOF, or buffer is full
-    while ((c = getchar()) != '\n' && c != EOF && i < 99) {
-        putchar(c); // Echo the character back
-        input[i++] = c;
+    while (scanf("%c", &c) != EOF && c != '\n' && i < 99) {
+        if (c == '\b' && i > 0) {
+            printf("\b \b");
+            i--;
+        } else if (c != '\b') {
+            printf("%c", c);
+            input[i++] = c;
+        }
     }
-    input[i] = '\0'; // Null-terminate the string
-
-    trim(input); // Trim leading and trailing spaces
+    
+    input[i] = '\0';
+    trim(input);
     return input;
 }

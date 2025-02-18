@@ -17,10 +17,8 @@ void setup() {
 }
 
 void loop() {
-
     printf("Enter your command: ");
     char* input = io::input();
-
 
     if (strcmp(input, "led on") == 0) {
         led.on();
@@ -28,7 +26,6 @@ void loop() {
         led.off();
     }
     printf("\n");
-    free(input);
     // int nr;
     // scanf("%d",nr);
     // printf("%d",nr);
