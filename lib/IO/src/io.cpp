@@ -1,25 +1,27 @@
-#include "io.h"
-#include <stdio.h>
+#include "IO.h"
+#include <stdIO.h>
 #include <string.h>
 #include <ctype.h>
 #include <Arduino.h>
 
-int io::serial_putchar(char c, FILE* f) {
+#define MAX_INPUT 100
+
+int IO::serial_putchar(char c, FILE* f) {
     Serial.write(c);
     return 0;
 }
 
-int io::serial_getchar(FILE* f) {
+int IO::serial_getchar(FILE* f) {
     while (Serial.available() <= 0);
     return Serial.read();
 }
 
-void io::init() {
+void IO::init() {
     FILE* serial_stream = fdevopen(&serial_putchar, &serial_getchar);
     stdin = stdout = serial_stream;
 }
 
-void io::trim(char *str) {
+void IO::trim(char* str) {
     int i = strlen(str) - 1;
     while (i >= 0 && isspace((unsigned char)str[i])) {
         str[i--] = '\0';
@@ -32,8 +34,8 @@ void io::trim(char *str) {
     memmove(str, start, strlen(start) + 1);
 }
 
-char* io::input() {
-    static char input[100];
+char* IO::input() {
+    static char input[MAX_INPUT];
     if (input == NULL) {
         return NULL;
     }

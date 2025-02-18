@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "Led.h"
 #include "Button.h"
-#include "io.h"
+#include "IO.h"
 #include <stdio.h>
 #include <Arduino.h>
 
@@ -13,12 +13,12 @@ void setup() {
     delay(500);
     pinMode(13,OUTPUT);
     pinMode(12,INPUT_PULLUP);
-    io::init();
+    IO::init();
 }
 
 void loop() {
     printf("Enter your command: ");
-    char* input = io::input();
+    char* input = IO::input();
 
     if (strcmp(input, "led on") == 0) {
         led.on();
@@ -26,7 +26,4 @@ void loop() {
         led.off();
     }
     printf("\n");
-    // int nr;
-    // scanf("%d",nr);
-    // printf("%d",nr);
 }
