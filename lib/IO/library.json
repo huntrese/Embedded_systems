@@ -1,0 +1,26 @@
+{
+    "name": "IO",
+    "version": "1.0.1",
+    "description": "A Library designed to provide a easy to use io redirect from C's stdio to Arduino Serial monitor",
+    "keywords": "Light, Darkness, Efficiency",
+    "authors":
+    [
+      {
+        "name": "vmm-mmv",
+        "email": "mihai.vieru@isa.utm.md",
+        "url": "https://www.linkedin.com/in/vieru-mihai"
+      },
+      {
+        "name": "Huntrese",
+        "email": "vlad.polisciuc@isa.utm.md",
+        "url": "https://www.linkedin.com/in/vlad-polisciuc-8508a9247/"
+      }
+    ],
+    "dependencies": {
+      "Logger": "^1.0.0"
+    },
+    "license": "MIT",
+    "frameworks": "arduino",
+    "platforms": "atmelavr"
+
+  }
