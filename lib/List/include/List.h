@@ -19,6 +19,8 @@ public:
             currentNode = currentNode->next;
         }
     }
+    void addPin(int pin);
+
 
 private:
     struct Node {
@@ -29,7 +31,6 @@ private:
     Node* head;
     Node* current;
 
-    void addPin(int pin);
 };
 
 // Constructor implementation
