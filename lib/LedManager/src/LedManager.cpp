@@ -1,58 +1,47 @@
 #include "LedManager.h"
-#include "LedManagerBase.h"
-#include "LedManagerDebug.h"
-#include "Logger.h"
+#include "Arduino.h"
 
-// Initialize with the base (non‑debug) implementation.
-ILedManager* LedManager::impl = new LedManagerBase();
+int LedManager::base_timer_interval = 0;
+
 
 int LedManager::checkPin(int pin) {
-    return impl->checkPin(pin);
+    return digitalRead(pin);
 }
 
 void LedManager::on(int pin) {
-    impl->on(pin);
+    if (checkPin(pin)) return; // Skip if already on
+    digitalWrite(pin, HIGH);
 }
 
 void LedManager::off(int pin) {
-    impl->off(pin);
+    if (!checkPin(pin)) return; // Skip if already off
+    digitalWrite(pin, LOW);
 }
 
 void LedManager::toggle(int pin) {
-    impl->toggle(pin);
+    digitalWrite(pin, !checkPin(pin));
 }
 
-void LedManager::blink(int pin, int times, int onTime, int offTime) {
-    impl->blink(pin, times, onTime, offTime);
-}
-
-void LedManager::check_group(LinkedList& pins) {
-    impl->check_group(pins);
-}
-
-void LedManager::on_group(LinkedList& pins) {
-    impl->on_group(pins);
-}
-
-void LedManager::off_group(LinkedList& pins) {
-    impl->off_group(pins);
-}
-
-void LedManager::blink_group(LinkedList& pins, int times, int onTime, int offTime) {
-    impl->blink_group(pins, times, onTime, offTime);
-}
-
-void LedManager::blink_group_async(LinkedList& pins, int times, int onTime, int offTime) {
-    impl->blink_group_async(pins, times, onTime, offTime);
-}
-
-void LedManager::setDebugMode(bool enabled) {
-    delete impl;  // Clean up the previous implementation
-    if (enabled) {
-        impl = new LedManagerDebug();
-        Logger::printf("[DEBUG] Debug mode enabled.");
-    } else {
-        impl = new LedManagerBase();
-        Logger::printf("Debug mode disabled.");
+void LedManager::blink(volatile BlinkArray& list, int pin, int times, int delayMs) {
+    // Assert that delayMs is a multiple of base_timer_interval
+    if (delayMs % base_timer_interval != 0) {
+        Serial.print("Error: delayMs (");
+        Serial.print(delayMs);
+        Serial.print(") must be a multiple of base_timer_interval (");
+        Serial.print(base_timer_interval);
+        Serial.println(").");
     }
+
+
+
+    // Add the blink task to the list
+    list.add(pin, delayMs, times);
+
+
 }
+
+void LedManager::blink_init(volatile BlinkArray& list, int timer_interval) {
+    base_timer_interval = timer_interval; // Set the base timer interval
+
+}
+
