@@ -1,39 +1,31 @@
-#include <Arduino.h>
-#include "LedManager.h"
-#include "List.h"
-#include "io.h"
-#include <String.h> 
+// Main sketch file (SecuritySystemMain.ino)
+#include "IO.h"
+#include "SecuritySystem.h"
 
-
+// Hardware configuration
+#define KEYPAD_PIN 4       // First pin for keypad (needs 8 consecutive pins)
+#define LCD_ADDRESS 0x27   // I2C address for LCD
+#define LCD_COLS 16        // LCD columns
+#define LCD_ROWS 2         // LCD rows
+#define GREEN_LED 12       // Success LED
+#define RED_LED 13         // Error LED
 
 void setup() {
-    Serial.begin(9600);
-    while (!Serial) { delay(10); }  
-
-    pinMode(13, OUTPUT);
-    IO::init();
+    // Choose IO mode - Serial or LCD/Keypad
+    IO::init(IO::LCD_KEYPAD_MODE);
+    
+    // For LCD/Keypad mode, initialize hardware
+    IO::initLCD(LCD_ADDRESS, LCD_COLS, LCD_ROWS);
+    IO::initKeypad(KEYPAD_PIN);
+    
+    // Initialize security system
+    SecuritySystem::init(GREEN_LED, RED_LED);
 }
 
 void loop() {
-    char input[128]; 
-    printf("Enter a Command: ");
-
-    if (scanf("%127[^\n]", input) != 1) {
-        printf("ERROR: Invalid input\n");
-    }
-    IO::clearInputBuffer();
-
-    IO::trimWhitespace(input);
-
-    if (strcmp(input, "led on") == 0) {
-        printf("Turning LED on\n");
-        LedManager::on(13);
-    } else if (strcmp(input, "led off") == 0) {
-        printf("Turning LED off\n");
-        LedManager::off(13);
-    } else {
-        printf("Invalid command: %s\n", input);
-    }
+    // Run security system update
+    SecuritySystem::update();
     
-
+    // Small delay for stability
+    delay(50);
 }
