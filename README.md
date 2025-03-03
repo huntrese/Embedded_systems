@@ -595,57 +595,39 @@ The diagram shows two main scenarios:
 ### Diagram 5: Method Block Diagrams
 
 ```mermaid
-flowchart TD
+flowchart LR
     subgraph Init["Initialization"]
-        direction TB
-        Start([Start]) --> IOInit["Initialize IO System"]
-        IOInit --> LCDInit["Configure LCD Display"]
-        LCDInit --> KPInit["Setup Keypad Matrix"]
+        Start([Start]) --> IOInit["Initialize IO"]
+        IOInit --> LCDInit["Configure LCD"]
+        LCDInit --> KPInit["Setup Keypad"]
         KPInit --> LEDInit["Configure LEDs"]
         LEDInit --> End([End])
-        
-        style Start fill:#90EE90,stroke:#006400,color:#000000
-        style End fill:#FFB6C1,stroke:#8B0000,color:#000000
     end
-    
     subgraph Auth["Authentication"]
-        direction TB
-        AuthStart([Start]) --> WaitKey["Wait for Key Press"]
+        AuthStart([Start]) --> WaitKey["Wait for Key"]
         WaitKey --> ValidKey{"Valid Input?"}
         ValidKey -->|Yes| StoreDigit["Store Digit"]
         ValidKey -->|No| WaitKey
-        StoreDigit --> Complete{"Code Complete?"}
-        Complete -->|No| WaitKey
+        StoreDigit --> Complete{"Complete?"}
         Complete -->|Yes| Verify["Verify Code"]
-        Verify --> Access{"Access Granted?"}
+        Verify --> Access{"Access OK?"}
         Access -->|Yes| Grant["Grant Access"]
         Access -->|No| Deny["Deny Access"]
         Grant --> Reset["Reset State"]
         Deny --> Reset
         Reset --> AuthEnd([End])
-        
-        style AuthStart fill:#90EE90,stroke:#006400,color:#000000
-        style AuthEnd fill:#FFB6C1,stroke:#8B0000,color:#000000
     end
-    
-    subgraph Program["Programming Mode"]
-        direction TB
-        PStart([Start]) --> HoldDetect["Detect 'D' Key Hold"]
+    subgraph Program["Programming"]
+        ProgStart([Start]) --> HoldDetect["Detect 'D' Hold"]
         HoldDetect --> NewCode["Enter New Code"]
-        NewCode --> Validate{"Validate Code"}
-        Validate -->|Invalid| NewCode
-        Validate -->|Valid| Save["Save New Code"]
-        Save --> Confirm["Show Confirmation"]
-        Confirm -->PEnd([End])
-        
-        style PStart fill:#90EE90,stroke:#006400,color:#000000
-        style PEnd fill:#FFB6C1,stroke:#8B0000,color:#000000
+        NewCode --> Validate{"Valid?"}
+        Validate -->|Yes| Save["Save Code"]
+        Save --> Confirm["Confirm"]
+        Confirm --> ProgEnd([End])
     end
-    
     Init --> Auth
     Auth --> Program
-    
-   
+
 ```
 
 
@@ -690,46 +672,23 @@ Each component requires specific connections:
 
 ```mermaid
 flowchart TD
-    subgraph Init["Initialization Phase"]
-        Start([Start]) --> IOInit["Initialize IO System"]
-        IOInit --> ModeSelect{"Interface<br/>Selection"}
-        ModeSelect -->|"Serial"| SerialConfig["Configure Serial<br/>9600 baud"]
-        ModeSelect -->|"LCD/Keypad"| LCDConfig["Configure LCD<br/>16x2 Display"]
-        SerialConfig --> InitEnd([Initialize Complete])
-        LCDConfig --> InitEnd
-    end
     
-    subgraph AuthLoop["Authentication Loop"]
-        InitEnd --> IdleState["Idle State"]
-        
-        IdleState --> KeyDetect{"Key Pressed?"}
-        KeyDetect -->|"No"| IdleState
-        
-        KeyDetect -->|"Yes"| KeyCode{"Special Key?<br/>'D' for Program"}
-        KeyCode -->|"Yes ('D')"| ProgramMode["Enter Program Mode"]
-        KeyCode -->|"No"| StoreCode["Store Digit"]
-        
-        StoreCode --> Complete{"Code<br/>Complete?"}
-        Complete -->|"No"| KeyDetect
-        Complete -->|"Yes"| Verify["Verify Code"]
-        
-        Verify --> Access{"Access<br/>Granted?"}
-        Access -->|"Yes"| GrantAccess["Grant Access<br/>Show Success"]
-        Access -->|"No"| DenyAccess["Deny Access<br/>Show Failure"]
-        
-        GrantAccess --> ResetState["Reset State"]
-        DenyAccess --> ResetState
-        
-        ProgramMode --> NewCode["Enter New Code"]
-        NewCode --> Validate{"Valid<br/>Format?"}
-        Validate -->|"Yes"| SaveCode["Save New Code"]
-        Validate -->|"No"| NewCode
-        
-        SaveCode --> ResetState
-        ResetState --> IdleState
+    %% Authentication Loop (Bottom)
+    subgraph Auth["Authentication"]
+        direction LR
+        InitDone --> Idle["Idle"]
+        Idle --> KeyPress{"Key?"}
+        KeyPress -->|No| Idle
+        KeyPress -->|Yes| Special{"'D'"?}
+        Special -->|No| Check["Check Code"]
+        Special -->|Yes| Program["Program Mode"]
+        Check --> Access{"Access OK?"}
+        Access -->|Yes| Grant["Grant Access"]
+        Access -->|No| Deny["Deny Access"]
+        Program --> Save["Save New Code"]
+        Grant & Deny & Save --> Reset["Reset"]
+        Reset --> Idle
     end
-    
-
 ```
 ## Results Presentation
 
