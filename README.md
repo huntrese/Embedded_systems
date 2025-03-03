@@ -1,3 +1,41 @@
+<div align="center">
+
+![UTM logo](https://github.com/user-attachments/assets/6ca14169-97b6-43f0-ac22-0dc4d5d22fef)
+
+**Ministerul Educației și Cercetării al Republicii Moldova**  
+**Universitatea Tehnică a Moldovei**  
+**Facultatea Calculatoare, Informatică și Microelectronică**  
+**Departamentul Ingineria Software și Automatică**  
+
+# REPORT
+
+*on the course*  
+## **Embedded Systems**  
+
+### **Laboratory work Nr. 1**  
+
+### THEME:  
+**Introduction to the IoT – button-led application development environment & User Interaction STDIO-Serial Interface**  
+
+
+
+
+
+---
+
+**Developed by:**  
+Polisciuc Vlad  
+st. gr. FAF-223  
+
+**Checked by:**  
+asist. univ. Martinuic A  
+
+---
+
+**Chișinău, 2025**
+
+</div>
+<div style="page-break-after: always;"></div>
 
 # Embedded Systems Security Module Report
 
@@ -603,20 +641,19 @@ flowchart LR
         KPInit --> LEDInit["Configure LEDs"]
         LEDInit --> End([End])
     end
+    
     subgraph Auth["Authentication"]
-        AuthStart([Start]) --> WaitKey["Wait for Key"]
-        WaitKey --> ValidKey{"Valid Input?"}
-        ValidKey -->|Yes| StoreDigit["Store Digit"]
-        ValidKey -->|No| WaitKey
-        StoreDigit --> Complete{"Complete?"}
-        Complete -->|Yes| Verify["Verify Code"]
-        Verify --> Access{"Access OK?"}
+        AuthStart([Start]) --> Input["Get Key Input"]
+        Input --> Valid{"Valid?"}
+        Valid -->|Yes| Access{"Access OK?"}
+        Valid -->|No| Input
         Access -->|Yes| Grant["Grant Access"]
         Access -->|No| Deny["Deny Access"]
         Grant --> Reset["Reset State"]
         Deny --> Reset
         Reset --> AuthEnd([End])
     end
+    
     subgraph Program["Programming"]
         ProgStart([Start]) --> HoldDetect["Detect 'D' Hold"]
         HoldDetect --> NewCode["Enter New Code"]
@@ -625,9 +662,9 @@ flowchart LR
         Save --> Confirm["Confirm"]
         Confirm --> ProgEnd([End])
     end
+    
     Init --> Auth
     Auth --> Program
-
 ```
 
 
