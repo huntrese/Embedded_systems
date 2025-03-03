@@ -12,10 +12,10 @@
 *on the course*  
 ## **Embedded Systems**  
 
-### **Laboratory work Nr. 1**  
+### **Laboratory work Nr. 1.2**  
 
 ### THEME:  
-**Introduction to the IoT – button-led application development environment & User Interaction STDIO-Serial Interface**  
+**User interaction LCD+Keypad**  
 
 
 
