@@ -115,7 +115,61 @@ These diagrams are essential for understanding the system's operation and serve 
 
 ## Design
 
-### Architectural Sketch
+### Diagram 1: Architectural Sketch
+
+```mermaid
+flowchart TD
+    subgraph Hardware["Hardware Layer"]
+        direction TB
+        Arduino["Arduino Board"]
+        LCD["LCD Display (I2C)"]
+        Keypad["Keypad Matrix"]
+        LEDs["LED Indicators"]
+    end
+    
+    subgraph Drivers["Driver Layer"]
+        direction TB
+        LCD_Drv["LCD Module Driver"]
+        KP_Drv["Keypad Module Driver"]
+        IO_Drv["IO Handler"]
+    end
+    
+    subgraph System["System Layer"]
+        direction TB
+        SS["Security System"]
+        Logger["Logger"]
+    end
+    
+    subgraph App["Application Layer"]
+        direction TB
+        Main["Main Application"]
+    end
+    
+    %% Hardware to Driver connections
+    LCD --> LCD_Drv
+    Keypad --> KP_Drv
+    LEDs --> IO_Drv
+    
+    %% Driver to System connections
+    LCD_Drv --> IO_Drv
+    KP_Drv --> IO_Drv
+    IO_Drv --> SS
+    SS --> Logger
+    
+    %% System to Application connections
+    SS --> Main
+    
+    %% Styling
+    classDef hardware fill:#f96,stroke:#333,color:#000
+    classDef driver fill:#9cf,stroke:#333,color:#000
+    classDef system fill:#9f9,stroke:#333,color:#000
+    classDef app fill:#f9f,stroke:#333,color:#000
+    
+    class Arduino,LCD,Keypad,LEDs hardware
+    class LCD_Drv,KP_Drv,IO_Drv driver
+    class SS,Logger system
+    class Main app
+```
 
 The system follows a layered architecture with clear boundaries between components:
 
@@ -156,6 +210,8 @@ These algorithms are implemented using a state-based approach, where the system 
 The debouncing implementation in the KeypadModule is particularly important for reliable operation, as it prevents multiple registrations of a single key press due to mechanical switch bouncing.
 
 ### Electrical Sketch
+
+![image](https://github.com/user-attachments/assets/8cef9844-8669-456e-b8b9-8c4fd5451714)
 
 The electrical connections of the system are straightforward but must be carefully implemented for reliable operation:
 
@@ -385,61 +441,7 @@ Each implemented module follows a specific functional pattern:
 These functional patterns ensure each module has a clear responsibility and interacts with other modules through well-defined interfaces.
 Let me generate the requested diagrams for your security system report. I'll create each diagram according to the specifications and include them in the appropriate sections.
 
-### Diagram 1: System Block Scheme
 
-```mermaid
-flowchart TD
-    subgraph Hardware["Hardware Layer"]
-        direction TB
-        Arduino["Arduino Board"]
-        LCD["LCD Display (I2C)"]
-        Keypad["Keypad Matrix"]
-        LEDs["LED Indicators"]
-    end
-    
-    subgraph Drivers["Driver Layer"]
-        direction TB
-        LCD_Drv["LCD Module Driver"]
-        KP_Drv["Keypad Module Driver"]
-        IO_Drv["IO Handler"]
-    end
-    
-    subgraph System["System Layer"]
-        direction TB
-        SS["Security System"]
-        Logger["Logger"]
-    end
-    
-    subgraph App["Application Layer"]
-        direction TB
-        Main["Main Application"]
-    end
-    
-    %% Hardware to Driver connections
-    LCD --> LCD_Drv
-    Keypad --> KP_Drv
-    LEDs --> IO_Drv
-    
-    %% Driver to System connections
-    LCD_Drv --> IO_Drv
-    KP_Drv --> IO_Drv
-    IO_Drv --> SS
-    SS --> Logger
-    
-    %% System to Application connections
-    SS --> Main
-    
-    %% Styling
-    classDef hardware fill:#f96,stroke:#333,color:#000
-    classDef driver fill:#9cf,stroke:#333,color:#000
-    classDef system fill:#9f9,stroke:#333,color:#000
-    classDef app fill:#f9f,stroke:#333,color:#000
-    
-    class Arduino,LCD,Keypad,LEDs hardware
-    class LCD_Drv,KP_Drv,IO_Drv driver
-    class SS,Logger system
-    class Main app
-```
 
 
 
@@ -735,25 +737,43 @@ The system interface provides clear feedback to the user through the LCD display
 
 1.  **Startup Screen**:
 
+When starting the program, user is welcomed by this screen:
+
 ```
 Security System
 Enter code:
 
 ```
 
+![photo_5346291985331383725_y](https://github.com/user-attachments/assets/c0ada8e1-2832-4c71-b6f5-563a0e9f9bb4)
+
+
+
+
 2.  **Access Granted Screen**:
+
+If the user inputs the correct password via keypad - initially '1234' then the led turns green and 'Acess Granted!' is displayed on the lcd
 
 ```
 Access Granted!
 
 ```
 
+![photo_5343932201449941279_y](https://github.com/user-attachments/assets/1faf71f4-efcc-49d7-aef1-a23a47534d93)
+
+
 3.  **Access Denied Screen**:
+
+If the user inputs the wrong password via keypad - initially '1234' then the led turns red and 'Acess Denied!' is displayed on the lcd
 
 ```
 Access Denied!
 
 ```
+
+![photo_5346291985331383724_y](https://github.com/user-attachments/assets/6e9fc170-620e-4088-84ff-5c41353ac2b1)
+
+by long pressing 'D' on the keypad the suer can enter programming mode where they can set the new password to be used later
 
 4.  **Programming Mode Screen**:
 
@@ -762,12 +782,20 @@ New Code:
 
 ```
 
+![photo_5343932201449941278_y](https://github.com/user-attachments/assets/eb0009ca-067f-48b2-9f47-cd24943a2417)
+
+
 5.  **Code Updated Screen**:
+
+After setting the enw password the user is notified that the password has changed
 
 ```
 Code updated!
 
 ```
+
+![photo_5343932201449941277_y](https://github.com/user-attachments/assets/77d3f807-2e33-46c7-8fc3-7ec44c55c623)
+
 
 These screens provide a simple but effective user interface, clearly communicating the system's state and expected actions.
 
@@ -829,6 +857,30 @@ Enter code:
 
 These serial outputs mirror what would be shown on the LCD in LCD/Keypad mode, providing a consistent user experience across interfaces.
 
+This functions because the IO module has 2 diffeerent modes of operation, it eithe rredirects stdio to serial monitor or to the lcd and keypad, this can be toggled in the main file.
+
+```cpp
+void IO::init(IOMode mode) {
+    currentMode = mode;
+    
+    if (mode == SERIAL_MODE) {
+        Serial.begin(9600);
+        while (!Serial) delay(10);
+    }
+    
+    // Setup stdin/stdout
+    static FILE stream;
+    
+    if (mode == SERIAL_MODE) {
+        fdev_setup_stream(&stream, serial_putchar, serial_getchar, _FDEV_SETUP_RW);
+    } else {
+        fdev_setup_stream(&stream, lcd_putchar, keypad_getchar, _FDEV_SETUP_RW);
+    }
+    
+    stdin = stdout = &stream;
+}
+```
+
 ## Conclusion
 
 ### Performance Analysis
@@ -883,4 +935,4 @@ The modular design principles demonstrated in this project are widely applicable
 
 ## AI Note
 
-In creating this report, the author utilized Claude as an AI assistant for generating and consolidating content. The information presented has been reviewed, validated, and adjusted according to the laboratory requirements.
+In creating this report, the author utilized Claude as an AI assistant for generating and consolidating textual content. The information presented has been reviewed, validated, and adjusted according to the laboratory requirements. Diagrams were editted with the use of Phind to look better and fit into pages.
