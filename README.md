@@ -117,14 +117,39 @@ These diagrams are essential for understanding the system's operation and serve 
 
 ### Diagram 1: Architectural Sketch
 
+### Diagram 6: Hardware Setup Schematic
+
+[![](https://mermaid.ink/img/pako:eNqNVN1u2jAUfhXLqNImhRXCT0M0VSIJIDSoKqi42LILNzZgEWzkJGKo6u0eYI-4J9mxzV_o1OIL-_j4-459Ph_7BSeSMuzjeSq3yZKoHD1FsUDQsuJ5ochmibqKFlzIHzHeWyiQRNEY_7RA3ShXLMm5FOgpOHkjvuA5SYG5t9AjF9nXZ3V7X6vWG6UIXUFSudCbGOOE7Naq3VYJ-ii3TAHSjLcDJQtBDXQ2fHAGD5HTmjmNL43ZkcQEtcZFZqMwgjDQo7GkRcrQp6Ebfr4isVkYAhF69Pf3n4NAqDUrUeEkAIK-BIJ5CTWNuoCCvoSCeRkVjjQqHJVR4ejDHL-x3YZQIFsDjUmu-K8rcpzIbQY0GE53EbnVqHwXoUw1CoZiLc6A7WrU-Vj_XqTJMKChoDwhuVTZFUcbKMaE1laPOords-4adSYs4xlEMhMdW4-Xsk-Y1gT6M3rjOvpFNjc3IIIQ9piZ9R3KvVq9Nzq-9WrdrNdUsfFBPV269L7i9DyMT9fGGx9UQvlM03yXcrGw8yQlWRaxOSL7ypnzNPUr_X7QaLedLFdyxfyKFzRb9YaTyFQqv1Iz7YKfJnTP9e7CXi84cpttzw2a73JXtgAtveP1g453pLuuF7ju-1szejx2uwN7HbjhXb3ltf7HPYtwEN-xojlW4r0c5zi4BPOHgMqOfm-Q8fmyvk1HX94-nfM1U46Orik4q13ADl4ztSacwh_7on0xzpdszWLsg0mJWsU4Fq-AI0UupzuRYD9XBXMwfGuLJfbnJM1gVmwoyVnECbyc9dG7IeK7lKc5oxwqd2y_dPOzv_4DC7nIoQ?type=png)](https://mermaid.live/edit#pako:eNqNVN1u2jAUfhXLqNImhRXCT0M0VSIJIDSoKqi42LILNzZgEWzkJGKo6u0eYI-4J9mxzV_o1OIL-_j4-459Ph_7BSeSMuzjeSq3yZKoHD1FsUDQsuJ5ochmibqKFlzIHzHeWyiQRNEY_7RA3ShXLMm5FOgpOHkjvuA5SYG5t9AjF9nXZ3V7X6vWG6UIXUFSudCbGOOE7Naq3VYJ-ii3TAHSjLcDJQtBDXQ2fHAGD5HTmjmNL43ZkcQEtcZFZqMwgjDQo7GkRcrQp6Ebfr4isVkYAhF69Pf3n4NAqDUrUeEkAIK-BIJ5CTWNuoCCvoSCeRkVjjQqHJVR4ejDHL-x3YZQIFsDjUmu-K8rcpzIbQY0GE53EbnVqHwXoUw1CoZiLc6A7WrU-Vj_XqTJMKChoDwhuVTZFUcbKMaE1laPOords-4adSYs4xlEMhMdW4-Xsk-Y1gT6M3rjOvpFNjc3IIIQ9piZ9R3KvVq9Nzq-9WrdrNdUsfFBPV269L7i9DyMT9fGGx9UQvlM03yXcrGw8yQlWRaxOSL7ypnzNPUr_X7QaLedLFdyxfyKFzRb9YaTyFQqv1Iz7YKfJnTP9e7CXi84cpttzw2a73JXtgAtveP1g453pLuuF7ju-1szejx2uwN7HbjhXb3ltf7HPYtwEN-xojlW4r0c5zi4BPOHgMqOfm-Q8fmyvk1HX94-nfM1U46Orik4q13ADl4ztSacwh_7on0xzpdszWLsg0mJWsU4Fq-AI0UupzuRYD9XBXMwfGuLJfbnJM1gVmwoyVnECbyc9dG7IeK7lKc5oxwqd2y_dPOzv_4DC7nIoQ)
+
+
+
+
+This hardware connection diagram illustrates the physical wiring of the system:
+
+- Orange boxes represent Arduino pins and power connections
+- Blue boxes show LCD module connections using I2C protocol
+- Green boxes indicate keypad matrix pin assignments
+- Pink boxes show LED indicator circuits with protective resistors
+
+Each component requires specific connections:
+
+- LCD uses only 4 wires (VCC, GND, SDA, SCL) thanks to I2C communication
+- Keypad requires 8 digital pins (4 rows, 4 columns)
+- LED indicators each need a resistor to limit current and prevent damage
+
+### Architectural Diagram
 ```mermaid
 flowchart TD
     subgraph Hardware["Hardware Layer"]
         direction TB
-        Arduino["Arduino Board"]
         LCD["LCD Display (I2C)"]
         Keypad["Keypad Matrix"]
         LEDs["LED Indicators"]
+    end
+    
+    subgraph Arduino["Arduino HAL"]
+        direction TB
+        AB["Arduino Board"]
     end
     
     subgraph Drivers["Driver Layer"]
@@ -145,10 +170,15 @@ flowchart TD
         Main["Main Application"]
     end
     
-    %% Hardware to Driver connections
-    LCD --> LCD_Drv
-    Keypad --> KP_Drv
-    LEDs --> IO_Drv
+    %% Hardware to Arduino connections
+    LCD --> AB
+    Keypad --> AB
+    LEDs --> AB
+    
+    %% Arduino to Driver connections
+    AB --> LCD_Drv
+    AB --> KP_Drv
+    AB --> IO_Drv
     
     %% Driver to System connections
     LCD_Drv --> IO_Drv
@@ -161,14 +191,42 @@ flowchart TD
     
     %% Styling
     classDef hardware fill:#f96,stroke:#333,color:#000
+    classDef arduino fill:#ff9,stroke:#333,color:#000
     classDef driver fill:#9cf,stroke:#333,color:#000
     classDef system fill:#9f9,stroke:#333,color:#000
     classDef app fill:#f9f,stroke:#333,color:#000
     
-    class Arduino,LCD,Keypad,LEDs hardware
+    class LCD,Keypad,LEDs hardware
+    class AB arduino
     class LCD_Drv,KP_Drv,IO_Drv driver
     class SS,Logger system
     class Main app
+```
+
+### Componentnts Interaction diagram:
+
+
+```mermaid
+flowchart TD
+    classDef actor fill:#f96,stroke:#333,stroke-width:2px,color:#000
+    classDef component fill:#9cf,stroke:#333,stroke-width:2px,color:#000
+    
+    subgraph Actors
+        User[User]:::actor
+    end
+    
+    subgraph SystemBoundary["Security System "]
+        Keypad[Keypad Interface]:::component
+        LCD[Display Interface]:::component
+        SS[Security Controller]:::component
+        Logger[Event Logger]:::component
+        
+        User -->|"Key Input"| Keypad
+        Keypad -->|"Process Input"| SS
+        SS -->|"Show Status"| LCD
+        LCD -->|"Display Feedback"| User
+        SS -->|"Log Event"| Logger
+    end
 ```
 
 The system follows a layered architecture with clear boundaries between components:
@@ -297,21 +355,7 @@ The header files define clear interfaces for each module, specifying what functi
 
 **IO.h**: Defines input/output methods that abstract the underlying hardware:
 
-```cpp
-class IO {
-public:
-    enum IOMode { SERIAL_MODE, LCD_KEYPAD_MODE };
-    static void init(IOMode mode = SERIAL_MODE);
-    static void initLCD(uint8_t address, uint8_t cols, uint8_t rows);
-    static void initKeypad(uint8_t startPin);
-    static void clearLCD();
-    static void clearInputBuffer();
-    static bool isKeyHeld(char key);
-    static IOMode currentMode;
-    // Private implementation details...
-};
-
-```
+See Code annex [1]
 
 This interface allows the application to:
 
@@ -322,15 +366,7 @@ This interface allows the application to:
 
 **SecuritySystem.h**: Defines the security system functionality:
 
-```cpp
-class SecuritySystem {
-public:
-    static void init(uint8_t greenLed, uint8_t redLed);
-    static void update();
-    // Private implementation details...
-};
-
-```
+See Code annex [2]
 
 This simple interface exposes only the necessary methods:
 
@@ -345,35 +381,7 @@ The implementation files contain the detailed logic for each module, with thorou
 
 **SecuritySystem.cpp**: The core security logic implementation:
 
-```cpp
-void SecuritySystem::update() {
-    // Check for keypress
-    if (stdin->flags & _FDEV_SETUP_READ) {
-        int c = getchar();
-        if (c != EOF) {
-            // Process key
-            char key = (char)c;
-            // Check for numeric and special keys
-            if ((key >= '0' && key <= '9') || (key >= 'A' && key <= 'D') || key == '*' || key == '#') {
-                if (codeIndex < CODE_LENGTH) {
-                    enteredCode[codeIndex++] = key;
-                    // Check if code is complete
-                    if (codeIndex >= CODE_LENGTH) {
-                        checkCode();
-                    }
-                }
-            }
-        }
-    }
-    // Check for program mode (hold D key)
-    if (IO::isKeyHeld('D') && !programMode) {
-        programMode = true;
-        reset();
-        printf("\nNew Code:");
-    }
-}
-
-```
+See code annex [3]
 
 This method demonstrates several important aspects:
 
@@ -386,24 +394,7 @@ The implementation carefully maintains the system's state and provides appropria
 
 **IO.cpp**: Handles the input/output operations:
 
-```cpp
-void IO::init(IOMode mode) {
-    currentMode = mode;
-    if (mode == SERIAL_MODE) {
-        Serial.begin(9600);
-        while (!Serial) delay(10);
-    }
-    // Setup stdin/stdout
-    static FILE stream;
-    if (mode == SERIAL_MODE) {
-        fdev_setup_stream(&stream, serial_putchar, serial_getchar, _FDEV_SETUP_RW);
-    } else {
-        fdev_setup_stream(&stream, lcd_putchar, keypad_getchar, _FDEV_SETUP_RW);
-    }
-    stdin = stdout = &stream;
-}
-
-```
+See Code annex [4]
 
 This implementation:
 
@@ -687,27 +678,9 @@ Elements are color-coded to represent different types:
 
 Each flow corresponds to specific methods in our class diagram, showing the detailed implementation steps for each major operation.
 
-### Diagram 6: Hardware Setup Schematic
-
-[![](https://mermaid.ink/img/pako:eNqNVN1u2jAUfhXLqNImhRXCT0M0VSIJIDSoKqi42LILNzZgEWzkJGKo6u0eYI-4J9mxzV_o1OIL-_j4-459Ph_7BSeSMuzjeSq3yZKoHD1FsUDQsuJ5ochmibqKFlzIHzHeWyiQRNEY_7RA3ShXLMm5FOgpOHkjvuA5SYG5t9AjF9nXZ3V7X6vWG6UIXUFSudCbGOOE7Naq3VYJ-ii3TAHSjLcDJQtBDXQ2fHAGD5HTmjmNL43ZkcQEtcZFZqMwgjDQo7GkRcrQp6Ebfr4isVkYAhF69Pf3n4NAqDUrUeEkAIK-BIJ5CTWNuoCCvoSCeRkVjjQqHJVR4ejDHL-x3YZQIFsDjUmu-K8rcpzIbQY0GE53EbnVqHwXoUw1CoZiLc6A7WrU-Vj_XqTJMKChoDwhuVTZFUcbKMaE1laPOords-4adSYs4xlEMhMdW4-Xsk-Y1gT6M3rjOvpFNjc3IIIQ9piZ9R3KvVq9Nzq-9WrdrNdUsfFBPV269L7i9DyMT9fGGx9UQvlM03yXcrGw8yQlWRaxOSL7ypnzNPUr_X7QaLedLFdyxfyKFzRb9YaTyFQqv1Iz7YKfJnTP9e7CXi84cpttzw2a73JXtgAtveP1g453pLuuF7ju-1szejx2uwN7HbjhXb3ltf7HPYtwEN-xojlW4r0c5zi4BPOHgMqOfm-Q8fmyvk1HX94-nfM1U46Orik4q13ADl4ztSacwh_7on0xzpdszWLsg0mJWsU4Fq-AI0UupzuRYD9XBXMwfGuLJfbnJM1gVmwoyVnECbyc9dG7IeK7lKc5oxwqd2y_dPOzv_4DC7nIoQ?type=png)](https://mermaid.live/edit#pako:eNqNVN1u2jAUfhXLqNImhRXCT0M0VSIJIDSoKqi42LILNzZgEWzkJGKo6u0eYI-4J9mxzV_o1OIL-_j4-459Ph_7BSeSMuzjeSq3yZKoHD1FsUDQsuJ5ochmibqKFlzIHzHeWyiQRNEY_7RA3ShXLMm5FOgpOHkjvuA5SYG5t9AjF9nXZ3V7X6vWG6UIXUFSudCbGOOE7Naq3VYJ-ii3TAHSjLcDJQtBDXQ2fHAGD5HTmjmNL43ZkcQEtcZFZqMwgjDQo7GkRcrQp6Ebfr4isVkYAhF69Pf3n4NAqDUrUeEkAIK-BIJ5CTWNuoCCvoSCeRkVjjQqHJVR4ejDHL-x3YZQIFsDjUmu-K8rcpzIbQY0GE53EbnVqHwXoUw1CoZiLc6A7WrU-Vj_XqTJMKChoDwhuVTZFUcbKMaE1laPOords-4adSYs4xlEMhMdW4-Xsk-Y1gT6M3rjOvpFNjc3IIIQ9piZ9R3KvVq9Nzq-9WrdrNdUsfFBPV269L7i9DyMT9fGGx9UQvlM03yXcrGw8yQlWRaxOSL7ypnzNPUr_X7QaLedLFdyxfyKFzRb9YaTyFQqv1Iz7YKfJnTP9e7CXi84cpttzw2a73JXtgAtveP1g453pLuuF7ju-1szejx2uwN7HbjhXb3ltf7HPYtwEN-xojlW4r0c5zi4BPOHgMqOfm-Q8fmyvk1HX94-nfM1U46Orik4q13ADl4ztSacwh_7on0xzpdszWLsg0mJWsU4Fq-AI0UupzuRYD9XBXMwfGuLJfbnJM1gVmwoyVnECbyc9dG7IeK7lKc5oxwqd2y_dPOzv_4DC7nIoQ)
 
 
-
-
-This hardware connection diagram illustrates the physical wiring of the system:
-
-- Orange boxes represent Arduino pins and power connections
-- Blue boxes show LCD module connections using I2C protocol
-- Green boxes indicate keypad matrix pin assignments
-- Pink boxes show LED indicator circuits with protective resistors
-
-Each component requires specific connections:
-
-- LCD uses only 4 wires (VCC, GND, SDA, SCL) thanks to I2C communication
-- Keypad requires 8 digital pins (4 rows, 4 columns)
-- LED indicators each need a resistor to limit current and prevent damage
-
-### Diagram 7: Main Algorithm Flowchart
+### Diagram 6: Main Algorithm Flowchart
 
 ```mermaid
 flowchart TD
@@ -859,27 +832,7 @@ These serial outputs mirror what would be shown on the LCD in LCD/Keypad mode, p
 
 This functions because the IO module has 2 diffeerent modes of operation, it eithe rredirects stdio to serial monitor or to the lcd and keypad, this can be toggled in the main file.
 
-```cpp
-void IO::init(IOMode mode) {
-    currentMode = mode;
-    
-    if (mode == SERIAL_MODE) {
-        Serial.begin(9600);
-        while (!Serial) delay(10);
-    }
-    
-    // Setup stdin/stdout
-    static FILE stream;
-    
-    if (mode == SERIAL_MODE) {
-        fdev_setup_stream(&stream, serial_putchar, serial_getchar, _FDEV_SETUP_RW);
-    } else {
-        fdev_setup_stream(&stream, lcd_putchar, keypad_getchar, _FDEV_SETUP_RW);
-    }
-    
-    stdin = stdout = &stream;
-}
-```
+See Code annex [5]
 
 ## Conclusion
 
@@ -932,6 +885,116 @@ The modular design principles demonstrated in this project are widely applicable
 2.  Liquid Crystal I2C Library - [Arduino LiquidCrystal_I2C](https://github.com/johnrickman/LiquidCrystal_I2C)
 3.  Embedded Systems Design: A Unified Hardware/Software Introduction - [Book by Frank Vahid and Tony Givargis](https://www.wiley.com/en-us/Embedded+System+Design%3A+A+Unified+Hardware+Software+Introduction-p-9780471386780)
 4.  Security in Embedded Systems: A Model-Based Approach - [IEEE Paper](https://ieeexplore.ieee.org/document/7975337)
+
+### Code annex
+[1]:
+
+```cpp
+class IO {
+public:
+    enum IOMode { SERIAL_MODE, LCD_KEYPAD_MODE };
+    static void init(IOMode mode = SERIAL_MODE);
+    static void initLCD(uint8_t address, uint8_t cols, uint8_t rows);
+    static void initKeypad(uint8_t startPin);
+    static void clearLCD();
+    static void clearInputBuffer();
+    static bool isKeyHeld(char key);
+    static IOMode currentMode;
+    // Private implementation details...
+};
+
+```
+
+[2]:
+
+```cpp
+class SecuritySystem {
+public:
+    static void init(uint8_t greenLed, uint8_t redLed);
+    static void update();
+    // Private implementation details...
+};
+
+```
+
+[3]:
+
+```cpp
+void SecuritySystem::update() {
+    // Check for keypress
+    if (stdin->flags & _FDEV_SETUP_READ) {
+        int c = getchar();
+        if (c != EOF) {
+            // Process key
+            char key = (char)c;
+            // Check for numeric and special keys
+            if ((key >= '0' && key <= '9') || (key >= 'A' && key <= 'D') || key == '*' || key == '#') {
+                if (codeIndex < CODE_LENGTH) {
+                    enteredCode[codeIndex++] = key;
+                    // Check if code is complete
+                    if (codeIndex >= CODE_LENGTH) {
+                        checkCode();
+                    }
+                }
+            }
+        }
+    }
+    // Check for program mode (hold D key)
+    if (IO::isKeyHeld('D') && !programMode) {
+        programMode = true;
+        reset();
+        printf("\nNew Code:");
+    }
+}
+
+
+```
+
+[4]:
+
+```cpp
+void IO::init(IOMode mode) {
+    currentMode = mode;
+    if (mode == SERIAL_MODE) {
+        Serial.begin(9600);
+        while (!Serial) delay(10);
+    }
+    // Setup stdin/stdout
+    static FILE stream;
+    if (mode == SERIAL_MODE) {
+        fdev_setup_stream(&stream, serial_putchar, serial_getchar, _FDEV_SETUP_RW);
+    } else {
+        fdev_setup_stream(&stream, lcd_putchar, keypad_getchar, _FDEV_SETUP_RW);
+    }
+    stdin = stdout = &stream;
+}
+
+```
+
+[5]:
+
+```cpp
+void IO::init(IOMode mode) {
+    currentMode = mode;
+    
+    if (mode == SERIAL_MODE) {
+        Serial.begin(9600);
+        while (!Serial) delay(10);
+    }
+    
+    // Setup stdin/stdout
+    static FILE stream;
+    
+    if (mode == SERIAL_MODE) {
+        fdev_setup_stream(&stream, serial_putchar, serial_getchar, _FDEV_SETUP_RW);
+    } else {
+        fdev_setup_stream(&stream, lcd_putchar, keypad_getchar, _FDEV_SETUP_RW);
+    }
+    
+    stdin = stdout = &stream;
+}
+```
+
 
 ## AI Note
 
