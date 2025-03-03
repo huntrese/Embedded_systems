@@ -645,11 +645,7 @@ flowchart TD
     Init --> Auth
     Auth --> Program
     
-    %% Styling
-    classDef process fill:#ADD8E6,stroke:#000080,color:#000000
-    classDef decision fill:#FFE4B5,stroke:#8B4513,color:#000000
-    class ValidKey,Complete,Access,Validate decision
-    class IOInit,LCDInit,KPInit,LEDInit,WaitKey,StoreDigit,Verify,Grant,Deny,Reset,HoldDetect,NewCode,Save,Confirm process
+   
 ```
 
 
@@ -733,16 +729,7 @@ flowchart TD
         ResetState --> IdleState
     end
     
-    %% Styling
-    classDef process fill:#ADD8E6,stroke:#000080,color:#000000
-    classDef decision fill:#FFE4B5,stroke:#8B4513,color:#000000
-    classDef state fill:#98FB98,stroke:#228B22,color:#000000
-    classDef terminal fill:#90EE90,stroke:#006400,color:#000000
-    
-    class IOInit,SerialConfig,LCDConfig,ProgramMode,StoreCode,Verify,GrantAccess,DenyAccess,NewCode,SaveCode,ResetState process
-    class ModeSelect,KeyDetect,KeyCode,Complete,Access,Validate decision
-    class IdleState,InitEnd state
-    class Start terminal
+
 ```
 ## Results Presentation
 
