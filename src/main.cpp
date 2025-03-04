@@ -7,8 +7,8 @@
 #define LCD_ADDRESS 0x27   // I2C address for LCD
 #define LCD_COLS 16        // LCD columns
 #define LCD_ROWS 2         // LCD rows
-#define GREEN_LED 12       // Success LED
-#define RED_LED 13         // Error LED
+#define GREEN_LED 13       // Success LED
+#define RED_LED 12         // Error LED
 
 void setup() {
     // Choose IO mode - Serial or LCD/Keypad
