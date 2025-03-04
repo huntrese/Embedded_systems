@@ -1,6 +1,8 @@
 // SecuritySystem.cpp - Implementation of security system
 #include "SecuritySystem.h"
 #include "IO.h"
+#include "LedManager.h"
+
 
 // Initialize static variables
 char SecuritySystem::enteredCode[CODE_LENGTH + 1] = "";
@@ -20,8 +22,8 @@ void SecuritySystem::init(uint8_t greenLedPin, uint8_t redLedPin) {
     pinMode(redLed, OUTPUT);
     
     // Turn off LEDs
-    digitalWrite(greenLed, LOW);
-    digitalWrite(redLed, LOW);
+    LedManager::off(greenLed);
+    LedManager::off(redLed);
     
     // Show welcome message
     printf("Security System\nEnter code: ");
@@ -63,8 +65,8 @@ void SecuritySystem::reset() {
     memset(enteredCode, 0, CODE_LENGTH + 1);
     
     // Turn off LEDs
-    digitalWrite(greenLed, LOW);
-    digitalWrite(redLed, LOW);
+    LedManager::off(greenLed);
+    LedManager::off(redLed);
     
     // Clear display properly based on mode
     if (IO::currentMode == IO::LCD_KEYPAD_MODE) {
@@ -83,22 +85,22 @@ void SecuritySystem::checkCode() {
         // Save new code
         strcpy(correctCode, enteredCode);
         printf("\nCode updated!");
-        digitalWrite(greenLed, HIGH);
+        LedManager::on(greenLed);
         delay(2000);
-        digitalWrite(greenLed, LOW);
+        LedManager::off(greenLed);
         programMode = false;
     } else {
         // Check code
         if (strcmp(enteredCode, correctCode) == 0) {
             printf("\nAccess Granted!");
-            digitalWrite(greenLed, HIGH);
+            LedManager::on(greenLed);
             delay(2000);
-            digitalWrite(greenLed, LOW);
+            LedManager::off(greenLed);
         } else {
             printf("\nAccess Denied!");
-            digitalWrite(redLed, HIGH);
+            LedManager::on(redLed);
             delay(2000);
-            digitalWrite(redLed, LOW);
+            LedManager::off(redLed);
         }
     }
     
