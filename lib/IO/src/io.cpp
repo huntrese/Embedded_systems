@@ -16,7 +16,7 @@ const char IO::keys[4][4] = {
     {'1', '2', '3', 'A'},
     {'4', '5', '6', 'B'},
     {'7', '8', '9', 'C'},
-    {'*', '0', '#', 'D'}
+    {'*', '0', '#', '\n'}
 };
 
 const unsigned long IO::HOLD_THRESHOLD = 1500; // 1.5 seconds

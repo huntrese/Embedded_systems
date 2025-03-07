@@ -1,5 +1,4 @@
 #include "LedManager.h"
-#include "Arduino.h"
 
 int LedManager::base_timer_interval = 0;
 
@@ -22,7 +21,11 @@ void LedManager::toggle(int pin) {
     digitalWrite(pin, !checkPin(pin));
 }
 
-void LedManager::blink(volatile BlinkArray& list, int pin, int times, int delayMs) {
+void LedManager::set(int pin, int state) {
+    digitalWrite(pin, state);
+}
+
+void LedManager::blink(std::map<int, std::map<String, int>>& list, int pin, int times, int delayMs) {
     // Assert that delayMs is a multiple of base_timer_interval
     if (delayMs % base_timer_interval != 0) {
         Serial.print("Error: delayMs (");
@@ -35,12 +38,13 @@ void LedManager::blink(volatile BlinkArray& list, int pin, int times, int delayM
 
 
     // Add the blink task to the list
-    list.add(pin, delayMs, times);
+    list[pin]["interval"]=delayMs;
+    list[pin]["times"]=2*times;
 
 
 }
 
-void LedManager::blink_init(volatile BlinkArray& list, int timer_interval) {
+void LedManager::blink_init(std::map<int, std::map<String, int>>& list, int timer_interval) {
     base_timer_interval = timer_interval; // Set the base timer interval
 
 }
