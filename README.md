@@ -12,10 +12,10 @@
 *on the course*  
 ## **Embedded Systems**  
 
-### **Laboratory work Nr. 1.2**  
+### **Laboratory work Nr. 2**  
 
 ### THEME:  
-**User interaction LCD+Keypad**  
+**Sequential Operating Systems**  
 
 
 
@@ -36,101 +36,61 @@ asist. univ. Martinuic A
 
 </div>
 <div style="page-break-after: always;"></div>
+### 1. Domain Analysis  
 
-# Embedded Systems Security Module Report
+#### Technologies Used and Application Context  
+The presented project is based on the Arduino platform, which is one of the most popular development platforms for embedded systems used both in academia and industry.  
+Arduino provides a complete ecosystem for developing embedded applications, integrating programmable hardware with a simple and accessible development environment.  
 
-## Introduction
+The developed application represents a control system based on events and temporality, utilizing fundamental concepts from embedded systems:  
+- Object-oriented programming in C++  
+- Digital input/output management  
+- Serial communication  
+- Timer interrupts  
+- Implementation of periodic tasks  
 
-### Analysis of Domain Situation
+#### Hardware and Software Components  
 
-The security system implemented is a simple access control system using a keypad and LCD interface. This system represents a common application of embedded systems in security contexts, where user authentication is required for access control. The system is built on Arduino architecture, providing a lightweight and cost-effective solution for basic security needs.
+**Hardware Components:**  
+- Arduino board (Arduino Uno)  
+- 2 LEDs connected to pins 12 and 13  
+- 3 buttons connected to pins 2, 3, and 4  
+- USB serial connection for communication and debugging  
 
-The implementation focuses on a PIN-based authentication system with features such as:
+**Software Components:**  
+- Arduino IDE or PlatformIO  
+- Custom libraries for encapsulating functionality:  
+  - **Button** – button management  
+  - **LED** – LED control  
+  - **IO** – interface for input/output through the serial port  
+  - **Task** – scheduler for executing periodic tasks  
+- **Timer-api** library for handling timer interrupts  
 
--   Code entry verification
--   Visual feedback using LED indicators
--   Programming mode for changing the access code
--   Dual-interface support (Serial and LCD/Keypad)
+#### System Architecture  
+The system implements a modular architecture based on classes, with each component encapsulated in a separate class with a well-defined interface. This object-oriented approach facilitates:  
+- Code reusability  
+- Individual component testing  
+- Improved code readability and maintainability  
+- System extensibility  
 
-This type of system is commonly used in scenarios requiring restricted access, such as door locks, safes, alarm systems, and other security applications where a simple but effective authentication mechanism is needed.
+The application uses timer interrupts to execute periodic tasks independently of the main program loop, adhering to the **separation of concerns** principle.  
 
-### Presentation of Hardware and Software Components
+#### Case Study  
+The developed application serves as a representative example of low-complexity automation systems, such as:  
+- Lighting control systems  
+- Interfaces for home automation systems  
+- Monitoring systems with timed reactions  
 
-**Hardware Components:**
+A concrete example of its applicability would be an indoor lighting control system, where buttons can be used to turn lights (represented by LEDs) on and off and adjust automatic on/off intervals. Similar systems are used in smart lighting solutions, optimizing energy consumption by dynamically adjusting functionality based on user presence and other environmental factors.  
 
-1.  **Arduino Board** - Core microcontroller platform providing the processing capabilities
-2.  **16x2 LCD Display with I2C Interface** - Used for user feedback and system status display
-3.  **4x4 Matrix Keypad** - Input interface for code entry
-4.  **LED Indicators** - Visual feedback (Green for access granted, Red for denied)
-5.  **Jumper Wires and Breadboard** - For circuit connections
-
-**Software Components:**
-
-1.  **IO Library** - Handles input/output operations with multiple interface support
-2.  **SecuritySystem Library** - Manages core security functions and state
-3.  **KeypadModule Library** - Handles keypad input and debouncing
-4.  **LCDModule Library** - Provides interface to the LCD display
-5.  **Logger Library** - Provides diagnostic and debugging capabilities
-6.  **List Library** - Implements a linked list data structure for pin management
-
-Each component has well-defined roles within the system, creating a modular and maintainable architecture.
-
-### System Architecture Justification
-
-The system follows a modular architecture with clear separation of concerns. This architectural choice offers several benefits:
-
-1.  **Maintainability** - Each module can be updated independently
-2.  **Reusability** - Modules like IO, KeypadModule, and LCDModule can be reused in other projects
-3.  **Testability** - Each module can be tested in isolation
-4.  **Scalability** - New features can be added without significant refactoring
-
-The architecture includes abstraction layers that separate hardware-specific code from application logic. For example, the IO module provides a common interface for both serial and LCD/keypad modes, allowing the security system to operate identically regardless of the interface used.
-
-Using object-oriented design with C++ classes creates a clean structure and encapsulates implementation details. The static method approach within classes provides namespace-like organization while maintaining minimal memory usage, which is important for resource-constrained embedded systems.
-
-### Case Study: Access Control System
-
-This security system can be applied in various contexts, such as:
-
-1.  **Home Security** - As an entry system for doors or gates
-2.  **Small Business Security** - For restricted areas or equipment
-3.  **Educational Settings** - For laboratory access control
-
-Consider a small business scenario: A company needs to restrict access to their server room. The implemented system can be installed at the entrance, requiring authorized personnel to enter a PIN code. The system provides:
-
--   Visual feedback through the LCD display and LEDs
--   Secure code storage in the microcontroller's memory
--   Administrator mode to change the access code when needed (by holding the 'D' key)
--   Low power consumption and reliable operation
-
-The modular nature of the system allows for easy expansion, such as adding a relay to control an electronic lock, or connecting to a network for centralized monitoring. These features demonstrate the system's applicability in real-world security scenarios.
-
-## Diagrams
-
-For the architecture and behavior of our system, I've prepared several diagrams that illustrate different aspects of the implementation. These diagrams will be referenced throughout the report to explain the system's design and operation.
-
-The block scheme diagram shows the overall system architecture, illustrating how components interact. The architectural diagram provides a more detailed view of the system's structure, while state diagrams and flowcharts explain the behavior of specific modules.
-
-These diagrams are essential for understanding the system's operation and serve as documentation for future development or maintenance.
-
-## Design
-
-### Diagram 1: Architectural Sketch
-
-### Diagram 6: Hardware Setup Schematic
-
-[![](https://mermaid.ink/img/pako:eNqNVN1u2jAUfhXLqNImhRXCT0M0VSIJIDSoKqi42LILNzZgEWzkJGKo6u0eYI-4J9mxzV_o1OIL-_j4-459Ph_7BSeSMuzjeSq3yZKoHD1FsUDQsuJ5ochmibqKFlzIHzHeWyiQRNEY_7RA3ShXLMm5FOgpOHkjvuA5SYG5t9AjF9nXZ3V7X6vWG6UIXUFSudCbGOOE7Naq3VYJ-ii3TAHSjLcDJQtBDXQ2fHAGD5HTmjmNL43ZkcQEtcZFZqMwgjDQo7GkRcrQp6Ebfr4isVkYAhF69Pf3n4NAqDUrUeEkAIK-BIJ5CTWNuoCCvoSCeRkVjjQqHJVR4ejDHL-x3YZQIFsDjUmu-K8rcpzIbQY0GE53EbnVqHwXoUw1CoZiLc6A7WrU-Vj_XqTJMKChoDwhuVTZFUcbKMaE1laPOords-4adSYs4xlEMhMdW4-Xsk-Y1gT6M3rjOvpFNjc3IIIQ9piZ9R3KvVq9Nzq-9WrdrNdUsfFBPV269L7i9DyMT9fGGx9UQvlM03yXcrGw8yQlWRaxOSL7ypnzNPUr_X7QaLedLFdyxfyKFzRb9YaTyFQqv1Iz7YKfJnTP9e7CXi84cpttzw2a73JXtgAtveP1g453pLuuF7ju-1szejx2uwN7HbjhXb3ltf7HPYtwEN-xojlW4r0c5zi4BPOHgMqOfm-Q8fmyvk1HX94-nfM1U46Orik4q13ADl4ztSacwh_7on0xzpdszWLsg0mJWsU4Fq-AI0UupzuRYD9XBXMwfGuLJfbnJM1gVmwoyVnECbyc9dG7IeK7lKc5oxwqd2y_dPOzv_4DC7nIoQ?type=png)](https://mermaid.live/edit#pako:eNqNVN1u2jAUfhXLqNImhRXCT0M0VSIJIDSoKqi42LILNzZgEWzkJGKo6u0eYI-4J9mxzV_o1OIL-_j4-459Ph_7BSeSMuzjeSq3yZKoHD1FsUDQsuJ5ochmibqKFlzIHzHeWyiQRNEY_7RA3ShXLMm5FOgpOHkjvuA5SYG5t9AjF9nXZ3V7X6vWG6UIXUFSudCbGOOE7Naq3VYJ-ii3TAHSjLcDJQtBDXQ2fHAGD5HTmjmNL43ZkcQEtcZFZqMwgjDQo7GkRcrQp6Ebfr4isVkYAhF69Pf3n4NAqDUrUeEkAIK-BIJ5CTWNuoCCvoSCeRkVjjQqHJVR4ejDHL-x3YZQIFsDjUmu-K8rcpzIbQY0GE53EbnVqHwXoUw1CoZiLc6A7WrU-Vj_XqTJMKChoDwhuVTZFUcbKMaE1laPOords-4adSYs4xlEMhMdW4-Xsk-Y1gT6M3rjOvpFNjc3IIIQ9piZ9R3KvVq9Nzq-9WrdrNdUsfFBPV269L7i9DyMT9fGGx9UQvlM03yXcrGw8yQlWRaxOSL7ypnzNPUr_X7QaLedLFdyxfyKFzRb9YaTyFQqv1Iz7YKfJnTP9e7CXi84cpttzw2a73JXtgAtveP1g453pLuuF7ju-1szejx2uwN7HbjhXb3ltf7HPYtwEN-xojlW4r0c5zi4BPOHgMqOfm-Q8fmyvk1HX94-nfM1U46Orik4q13ADl4ztSacwh_7on0xzpdszWLsg0mJWsU4Fq-AI0UupzuRYD9XBXMwfGuLJfbnJM1gVmwoyVnECbyc9dG7IeK7lKc5oxwqd2y_dPOzv_4DC7nIoQ)
+### 2. Design  
+**Architectural Sketch**  
+![image](https://github.com/user-attachments/assets/0a103b88-25c0-4a47-a02f-14b1879c7569)
 
 
 
 
-This hardware connection diagram illustrates the physical wiring of the system:
-
-- Orange boxes represent Arduino pins and power connections
-- Blue boxes show LCD module connections using I2C protocol
-- Green boxes indicate keypad matrix pin assignments
-- Pink boxes show LED indicator circuits with protective resistors
-
+This hardware connection diagram illustrates the physical wiring of the system.
 Each component requires specific connections:
 
 - LCD uses only 4 wires (VCC, GND, SDA, SCL) thanks to I2C communication
@@ -161,7 +121,6 @@ flowchart TD
     
     subgraph System["System Layer"]
         direction TB
-        SS["Security System"]
         Logger["Logger"]
     end
     
@@ -170,37 +129,15 @@ flowchart TD
         Main["Main Application"]
     end
     
-    %% Hardware to Arduino connections
-    LCD --> AB
-    Keypad --> AB
-    LEDs --> AB
-    
-    %% Arduino to Driver connections
-    AB --> LCD_Drv
-    AB --> KP_Drv
-    AB --> IO_Drv
-    
-    %% Driver to System connections
-    LCD_Drv --> IO_Drv
-    KP_Drv --> IO_Drv
-    IO_Drv --> SS
-    SS --> Logger
-    
-    %% System to Application connections
-    SS --> Main
-    
-    %% Styling
-    classDef hardware fill:#f96,stroke:#333,color:#000
-    classDef arduino fill:#ff9,stroke:#333,color:#000
-    classDef driver fill:#9cf,stroke:#333,color:#000
-    classDef system fill:#9f9,stroke:#333,color:#000
-    classDef app fill:#f9f,stroke:#333,color:#000
-    
-    class LCD,Keypad,LEDs hardware
-    class AB arduino
-    class LCD_Drv,KP_Drv,IO_Drv driver
-    class SS,Logger system
-    class Main app
+    %% Connections
+    LCD --> LCD_Drv
+    Keypad --> KP_Drv
+    LEDs --> IO_Drv
+    LCD_Drv --> AB
+    KP_Drv --> AB
+    IO_Drv --> AB
+    AB --> Logger
+    Logger --> Main
 ```
 
 ### Componentnts Interaction diagram:
@@ -215,18 +152,60 @@ flowchart TD
         User[User]:::actor
     end
     
-    subgraph SystemBoundary["Security System "]
+    subgraph Hardware["Hardware Layer"]
         Keypad[Keypad Interface]:::component
         LCD[Display Interface]:::component
-        SS[Security Controller]:::component
-        Logger[Event Logger]:::component
-        
-        User -->|"Key Input"| Keypad
-        Keypad -->|"Process Input"| SS
-        SS -->|"Show Status"| LCD
-        LCD -->|"Display Feedback"| User
-        SS -->|"Log Event"| Logger
+        LEDs[LED System]:::component
     end
+    
+    subgraph Arduino["Arduino HAL"]
+        AB[Arduino Board]:::component
+    end
+    
+    subgraph Drivers["Driver Layer"]
+        KP_Drv[Keypad Driver]:::component
+        LCD_Drv[Display Driver]:::component
+        IO_Drv[IO Handler]:::component
+    end
+    
+    subgraph System["System Layer"]
+        Logger[Event Logger]:::component
+    end
+    
+    subgraph App["Application Layer"]
+        Main[Main Application]:::component
+    end
+    
+    %% User Interactions
+    User -->|"Key Input"| Keypad
+    User -->|"View Status"| LCD
+    
+    %% Hardware to Driver Connections
+    Keypad --> KP_Drv
+    LCD --> LCD_Drv
+    LEDs --> IO_Drv
+    
+    %% Driver to Arduino Connections
+    KP_Drv --> AB
+    LCD_Drv --> AB
+    IO_Drv --> AB
+    
+    %% Arduino to System Layer
+    AB --> Logger
+    
+    %% System to Application Layer
+    Logger --> Main
+    
+    %% LED Control Flow
+    Main -->|"Control Signals"| IO_Drv
+    IO_Drv -->|"LED States"| LEDs
+    
+    %% Status Display Flow
+    Main -->|"Display Updates"| LCD_Drv
+    LCD_Drv -->|"Show Status"| LCD
+    
+    %% Keypad Input Flow
+    KP_Drv -->|"Keypad Events"| Main
 ```
 
 The system follows a layered architecture with clear boundaries between components:
@@ -247,29 +226,20 @@ The IO module serves as a central interface that abstracts the specific hardware
 
 The modular approach with separate .h and .cpp files for each component follows C++ best practices and ensures that the interfaces are clearly defined and implementation details are hidden appropriately.
 
-### Behavior Schemes and Algorithms
+System Overview
+The system consists of three main components:
 
-The system's behavior can be described using several key algorithms:
+Hardware interfaces (Keypad, LCD, LEDs)
+Timer-based control system
+LED management system
+Let's visualize the system's flow:
 
-1.  **Authentication Flow**:
-    
-    -   User inputs a code using the keypad
-    -   System compares the entered code with the stored one
-    -   System provides feedback (access granted/denied) and resets for the next entry
-2.  **Programming Mode Flow**:
-    
-    -   User holds the 'D' key to enter programming mode
-    -   User enters a new code
-    -   System stores the new code and confirms the update
-    -   System returns to normal operation
+![image](https://github.com/user-attachments/assets/dcd963eb-97f3-4c18-b137-6a108c53e4c3)
 
-These algorithms are implemented using a state-based approach, where the system tracks its current state and transitions based on user input and internal conditions. This approach simplifies the code and makes the behavior more predictable and easier to debug.
-
-The debouncing implementation in the KeypadModule is particularly important for reliable operation, as it prevents multiple registrations of a single key press due to mechanical switch bouncing.
 
 ### Electrical Sketch
 
-![image](https://github.com/user-attachments/assets/8cef9844-8669-456e-b8b9-8c4fd5451714)
+![image](https://github.com/user-attachments/assets/8455d10f-01ee-4ea7-8658-cbb64b34b51e)
 
 The electrical connections of the system are straightforward but must be carefully implemented for reliable operation:
 
@@ -285,6 +255,7 @@ The electrical connections of the system are straightforward but must be careful
     
     -   Green LED on pin 12 with current-limiting resistor
     -   Red LED on pin 13 with current-limiting resistor
+    -   Other LED on pin 2 with current-limiting resistor
 
 The I2C connection for the LCD simplifies wiring by requiring only 4 wires (VCC, GND, SDA, SCL) instead of the 6+ wires needed for parallel connection. This reduces clutter and potential for wiring errors.
 
@@ -293,41 +264,68 @@ The I2C connection for the LCD simplifies wiring by requiring only 4 wires (VCC,
 The project is organized in a hierarchical structure that reflects the architectural components:
 
 ```
-Embedded_Systems/
-├── lib/
-│   ├── IO/
-│   │   ├── include/
-│   │   │   └── io.h
-│   │   └── src/
-│   │       └── io.cpp
-│   ├── KeypadModule/
-│   │   ├── include/
-│   │   │   └── KeypadModule.h
-│   │   └── src/
-│   │       └── KeypadModule.cpp
-│   ├── LCDModule/
-│   │   ├── include/
-│   │   │   └── LCDModule.h
-│   │   └── src/
-│   │       └── LCDModule.cpp
-│   ├── List/
-│   │   ├── include/
-│   │   │   └── List.h
-│   │   └── src/
-│   │       └── List.cpp
-│   ├── Logger/
-│   │   ├── include/
-│   │   │   └── Logger.h
-│   │   └── src/
-│   │       └── Logger.cpp
-│   └── SecuritySystem/
-│       ├── include/
-│       │   └── SecuritySystem.h
-│       └── src/
-│           └── SecuritySystems.cpp
-└── src/
-    └── main.cpp
-
+├── .gitignore
+├── .vscode
+    ├── extensions.json
+    └── settings.json
+├── README.md
+├── diagram.json
+├── include
+    ├── README
+    └── TimerConfigs.h
+├── lib
+    ├── IO
+    │   ├── include
+    │   │   └── io.h
+    │   ├── library.json
+    │   └── src
+    │   │   └── io.cpp
+    ├── KeypadModule
+    │   ├── include
+    │   │   └── KeypadModule.h
+    │   ├── library.json
+    │   └── src
+    │   │   └── KeypadModule.cpp
+    ├── LCDModule
+    │   ├── include
+    │   │   └── LCDModule.h
+    │   ├── library.json
+    │   └── src
+    │   │   └── LCDModule.cpp
+    ├── LedManager
+    │   ├── include
+    │   │   └── LedManager.h
+    │   ├── library.json
+    │   └── src
+    │   │   └── LedManager.cpp
+    ├── List
+    │   ├── include
+    │   │   ├── BlinkList.h
+    │   │   └── List.h
+    │   ├── library.json
+    │   └── src
+    │   │   ├── BlinkList.cpp
+    │   │   └── List.cpp
+    ├── Logger
+    │   ├── include
+    │   │   └── Logger.h
+    │   ├── library.json
+    │   └── src
+    │   │   └── Logger.cpp
+    ├── README
+    └── SecuritySystem
+    │   ├── include
+    │       └── SecuritySystem.h
+    │   ├── library.json
+    │   └── src
+    │       └── SecuritySystems.cpp
+├── platformio.ini
+├── src
+    ├── main.cpp
+    └── main_old.cpp
+├── test
+    └── README
+└── wokwi.toml
 ```
 
 This organization follows standard C++ project conventions, with include directories containing header files and src directories containing implementation files. It also separates libraries from the main application code, making the project structure clean and maintainable.
@@ -341,11 +339,9 @@ Each module has a specific role, and the directory structure reflects the system
 The system is implemented using a modular approach, with each component encapsulated in its own set of files:
 
 1.  **IO Module**: Provides a unified interface for input/output operations, supporting both serial and LCD/keypad modes.
-2.  **SecuritySystem Module**: Implements the core security functionality, including code verification and mode switching.
 3.  **KeypadModule**: Handles keypad input, including debouncing and key detection.
 4.  **LCDModule**: Manages the LCD display, including positioning and text output.
 5.  **Logger Module**: Provides debugging and logging capabilities with multiple log levels.
-6.  **List Module**: Implements a simple linked list for managing collections of items.
 
 Each module is implemented as a C++ class with static methods, which provides organization similar to namespaces while reducing memory overhead. This approach is well-suited for resource-constrained embedded systems.
 
@@ -364,22 +360,12 @@ This interface allows the application to:
 -   Perform common operations like clearing the display
 -   Check for held keys (used for entering programming mode)
 
-**SecuritySystem.h**: Defines the security system functionality:
-
-See Code annex [2]
-
-This simple interface exposes only the necessary methods:
-
--   `init()`: Set up the security system with LED pins
--   `update()`: Process input and update the system state
-
-The clean interfaces hide implementation details while providing all necessary functionality, following the principle of information hiding.
 
 ### Implementation Files (.cpp)
 
 The implementation files contain the detailed logic for each module, with thorough comments explaining the critical sections:
 
-**SecuritySystem.cpp**: The core security logic implementation:
+**main.cpp**: The core Operating System logic implementation:
 
 See code annex [3]
 
@@ -415,12 +401,7 @@ Each implemented module follows a specific functional pattern:
 -   Routes input and output through appropriate handlers
 -   Manages hardware-specific initialization and configuration
 
-**SecuritySystem Module**:
 
--   Implements the core application logic
--   Manages system state (normal mode vs. programming mode)
--   Processes input codes and provides feedback
--   Controls indicator LEDs for visual feedback
 
 **KeypadModule**:
 
@@ -492,7 +473,7 @@ classDiagram
 
 
 
-This class diagram illustrates the SecuritySystem module's structure and its relationships with other components:
+This class diagram illustrates a module's structure and its relationships with other components:
 
 - Methods prefixed with '+' are public (accessible from outside the class)
 - Methods prefixed with '-' are private (internal implementation details)
@@ -503,109 +484,142 @@ This class diagram illustrates the SecuritySystem module's structure and its rel
 
 ```mermaid
 stateDiagram-v2
+    direction LR
+    
     [*] --> Idle
     
     state Idle {
-        [*] --> WaitingForInput
-        WaitingForInput --> ProgrammingMode: Hold 'D'
-        WaitingForInput --> CodeEntry: Numeric/Special Key
+        [*] --> MonitoringInputs
+        MonitoringInputs --> TaskARunning: '1' pressed
+        MonitoringInputs --> TaskCRunning: '2'/'3' pressed
     }
     
-    state CodeEntry {
-        [*] --> EnteringDigits
-        EnteringDigits --> CheckingCode: Complete Code Entered
-        CheckingCode --> AccessGranted: Valid Code
-        CheckingCode --> AccessDenied: Invalid Code
+    state TaskARunning {
+        [*] --> ToggleGreenLED
+        ToggleGreenLED --> UpdateState: Complete
     }
     
-    state ProgrammingMode {
-        [*] --> EnterNewCode
-        EnterNewCode --> SaveNewCode: Complete Code Entered
-        SaveNewCode --> UpdateSuccess: Validation Passed
+    state TaskCRunning {
+        [*] --> CheckCommand
+        CheckCommand --> AdjustInterval: Valid Command
+        AdjustInterval --> ValidateBounds: Update Interval
+        ValidateBounds --> LogResult: Out of Bounds
+        ValidateBounds --> UpdateInterval: Within Bounds
     }
     
-    Idle --> CodeEntry: Start Entry
-    AccessGranted --> Idle: Reset After Success
-    AccessDenied --> Idle: Reset After Failure
-    UpdateSuccess --> Idle: Return to Normal Operation
-    
-    state AccessGranted {
-        [*] --> ShowAccessMessage
-        ShowAccessMessage --> ActivateRelay: Optional Hardware Control
-        ActivateRelay --> ResetState
+    state TaskBRunning {
+        [*] --> CheckGreenState
+        CheckGreenState --> BlinkRedLED: Green Off
+        CheckGreenState --> StopBlinking: Green On
     }
     
-    state AccessDenied {
-        [*] --> ShowDenialMessage
-        ShowDenialMessage --> LockoutTimer: Multiple Failures
-        LockoutTimer --> ResetState
+    Idle --> TaskARunning: Timer Trigger
+    TaskARunning --> Idle: Complete
+    Idle --> TaskCRunning: Timer Trigger
+    TaskCRunning --> Idle: Complete
+    Idle --> TaskBRunning: Timer Trigger
+    TaskBRunning --> Idle: Complete
+    
+    state LEDStates {
+        [*] --> LEDIdle
+        LEDIdle --> GreenLEDActive: Toggle On
+        GreenLEDActive --> LEDIdle: Toggle Off
+        LEDIdle --> RedLEDBlinking: Start Blink
+        RedLEDBlinking --> LEDIdle: Stop Blink
     }
     
-    state ProgrammingMode {
-        [*] --> ShowProgramMessage
-        ShowProgramMessage --> ValidateAdmin: Check Admin Rights
-        ValidateAdmin --> EnterNewCode: Authorized
-    }
+    TaskARunning --> GreenLEDActive: Toggle Command
+    TaskBRunning --> RedLEDBlinking: Blink Command
+    
+    note left of TaskCRunning: Adjusts RED_LED_interval\n50ms min, 950ms max
+    note right of TaskBRunning: Blinks red LED when\ngreen LED is off
 ```
 
 
 
 
-This state diagram illustrates the system's behavioral flow:
+## State Structure
 
-- Nested states (shown inside larger boxes) represent complex behaviors
-- [*] represents the initial state within each box
-- Transitions show how the system moves between states, with conditions shown after colons
-- The diagram corresponds to the SecuritySystem class methods shown in the previous class diagram
+Nested states (shown inside larger boxes) represent complex behaviors managed by different tasks
+[*] represents the initial state within each box
+Transitions show how the system moves between states, with conditions shown after colons
+The system operates primarily across three main tasks (TaskA, TaskB, TaskC) with supporting LED state management
 
-The system operates primarily in three modes:
+## System Operation
 
-1. Idle: Waiting for user input
-2. CodeEntry: Processing entered codes
-3. ProgrammingMode: Updating access codes
+The system operates in the following modes:
+
+## Idle State
+
+Acts as the central hub for all task transitions
+
+Continuously monitors for input commands
+
+Manages task scheduling through timer triggers
+
+TaskA (Green LED Control)
+
+Triggered by '1' key press or timer event
+
+Toggles the green LED state
+
+Updates the global green_led_state variable
+
+TaskB (Red LED Control)
+
+Runs periodically based on timer events
+
+Manages red LED blinking behavior
+
+Depends on green LED state for operation
+
+TaskC (Interval Adjustment)
+
+Responds to '2'/'3' key presses
+
+Adjusts the RED_LED_interval between 50ms and 950ms
+
+Provides bounds checking and logging
+
+## LED States
+
+Maintains independent state tracking for each LED
+Coordinates LED transitions based on task outputs
+Ensures proper LED behavior synchronization
+Each task operates independently but shares resources through global variables, creating a coordinated system that manages LED behaviors based on user input and timing events.
 
 ### Diagram 4: Architectural Interaction Diagram
 
 ```mermaid
 sequenceDiagram
-    participant User
-    participant Keypad
-    participant LCD
-    participant SecuritySystem
+    participant Main
+    participant Timer1
+    participant Timer2
+    participant LEDStates
     participant Logger
     
-    User->>Keypad: Presses Key
-    activate Keypad
-    Keypad->>SecuritySystem: Process Key Input
-    deactivate Keypad
+    Note over Main,Logger: System Initialization
+    Main->>Timer1: Configure Timer1
+    Main->>Timer2: Configure Timer2
+    Main->>LEDStates: Initialize LEDs
     
-    activate SecuritySystem
-    SecuritySystem->>LCD: Display Status Message
-    activate LCD
-    LCD-->>User: Shows Feedback
-    deactivate LCD
-    
-    alt Valid Code Entered
-        SecuritySystem->>SecuritySystem: Grant Access
-        SecuritySystem->>LCD: Show Access Granted
-        SecuritySystem->>Logger: Log Successful Access
-    else Invalid Code Entered
-        SecuritySystem->>SecuritySystem: Deny Access
-        SecuritySystem->>LCD: Show Access Denied
-        SecuritySystem->>Logger: Log Failed Attempt
+    Note over Main,Logger: Main Loop
+    loop Main Loop
+        Main->>Main: Check Input
+        Main->>Main: Update LCD
     end
     
-    deactivate SecuritySystem
-    
-    alt Programming Mode (Hold 'D')
-        User->>Keypad: Hold 'D' Key
-        Keypad->>SecuritySystem: Enter Programming Mode
-        SecuritySystem->>LCD: Request New Code
-        User->>Keypad: Enter New Code
-        Keypad->>SecuritySystem: Validate New Code
-        SecuritySystem->>LCD: Confirm Code Update
-        SecuritySystem->>Logger: Log Code Change
+    Note over Timer1,Timer2: Timer Interrupts
+    loop Timer1 Interrupt
+        Timer1->>LEDStates: Toggle LED
     end
+    
+    loop Timer2 Interrupt
+        Timer2->>LEDStates: Update LED State
+    end
+    
+    Note over LEDStates,Logger: LED Management
+    LEDStates->>Logger: Log State Changes
 ```
 
 
@@ -613,71 +627,78 @@ sequenceDiagram
 
 This sequence diagram illustrates the temporal flow of interactions between system components:
 
-- Vertical bars show when each component is active
-- 'alt' sections show alternative paths based on conditions
-- Participants (boxes at top) represent the major components from our architecture diagram
-- Arrows show communication between components, with solid arrows representing requests and dashed arrows showing responses
+## Key Components
 
-The diagram shows two main scenarios:
-
-1. Normal operation: User input processing and authentication
-2. Programming mode: Secure code update procedure
+Main: The main program flow handling initialization and the main loop
+Timer1 and Timer2: Hardware timers triggering periodic interrupts
+TaskA, TaskB, TaskC: Tasks executed by timer interrupts
+LEDStates: Manages the state of all LEDs
+Logger: Handles all system logging operations
 
 ### Diagram 5: Method Block Diagrams
 
 ```mermaid
-flowchart LR
-    subgraph Init["Initialization"]
-        Start([Start]) --> IOInit["Initialize IO"]
-        IOInit --> LCDInit["Configure LCD"]
-        LCDInit --> KPInit["Setup Keypad"]
-        KPInit --> LEDInit["Configure LEDs"]
-        LEDInit --> End([End])
+flowchart TD
+    subgraph Init["System Initialization"]
+        Start([Start]) --> SerialInit["Initialize Serial Port"]
+        SerialInit --> IOConfig["Configure IO Mode"]
+        IOConfig --> KeypadInit["Initialize Keypad"]
+        KeypadInit --> LCDInit["Initialize LCD"]
+        LCDInit --> TimerConfig["Configure Timers"]
+        TimerConfig --> PinSetup["Set Up Pins"]
+        PinSetup --> InterruptEnable["Enable Interrupts"]
+        InterruptEnable --> EndInit([End])
     end
     
-    subgraph Auth["Authentication"]
-        AuthStart([Start]) --> Input["Get Key Input"]
-        Input --> Valid{"Valid?"}
-        Valid -->|Yes| Access{"Access OK?"}
-        Valid -->|No| Input
-        Access -->|Yes| Grant["Grant Access"]
-        Access -->|No| Deny["Deny Access"]
-        Grant --> Reset["Reset State"]
-        Deny --> Reset
-        Reset --> AuthEnd([End])
+    subgraph TaskMgmt["Task Management"]
+        TaskStart([Start]) --> CheckTasks{"Check Tasks"}
+        CheckTasks -->|"Task A"| TaskAGreen["Toggle Green LED"]
+        CheckTasks -->|"Task B"| TaskBRed["Control Red LED"]
+        CheckTasks -->|"Task C"| TaskCSpeed["Adjust Speed"]
+        TaskAGreen --> UpdateCounters["Update Counters"]
+        TaskBRed --> UpdateCounters
+        TaskCSpeed --> UpdateCounters
+        UpdateCounters --> CheckTasks
     end
     
-    subgraph Program["Programming"]
-        ProgStart([Start]) --> HoldDetect["Detect 'D' Hold"]
-        HoldDetect --> NewCode["Enter New Code"]
-        NewCode --> Validate{"Valid?"}
-        Validate -->|Yes| Save["Save Code"]
-        Save --> Confirm["Confirm"]
-        Confirm --> ProgEnd([End])
+    subgraph BlinkCtrl["LED Blink Control"]
+        BlinkStart([Start]) --> TimerCheck{"Timer Ready?"}
+        TimerCheck -->|"Yes"| ProcessDict["Process LED Dictionary"]
+        ProcessDict --> ToggleLED["Toggle LED State"]
+        ToggleLED --> Cleanup["Clean Up Completed Entries"]
+        Cleanup --> TimerCheck
+        TimerCheck -->|"No"| Wait["Wait"]
+        Wait --> TimerCheck
     end
     
-    Init --> Auth
-    Auth --> Program
 ```
 
 
+This diagram represents the system's operation across three main functional areas:
 
+## System Initialization
 
-This flowchart breaks down the system's main operations into three distinct flows:
+Shows the sequential startup process
+Includes hardware initialization and configuration
+Represents the setup() function's primary operations
 
-- Initialization: Setup sequence for all hardware components
-- Authentication: Core security verification process
-- Programming: Secure code update procedure
+## Task Management
 
-Elements are color-coded to represent different types:
+Illustrates the cyclic nature of task execution
+Shows the interaction between tasks A, B, and C
+Represents the main loop() and ISR handling
 
-- Blue boxes: Processing steps
-- Light brown diamonds: Decision points
-- Green rounded rectangles: Starting points
-- Pink rounded rectangles: Ending points
+## LED Blink Control
 
-Each flow corresponds to specific methods in our class diagram, showing the detailed implementation steps for each major operation.
+Demonstrates the state machine for LED management
+Shows dictionary-based LED control
+Represents the blink_check_new() functionality
 
+Blue boxes: Processing steps
+Light brown diamonds: Decision points
+Green rounded rectangles: Starting points
+Pink rounded rectangles: Ending points
+Each subgraph corresponds to specific methods in the codebase, maintaining the same level of detail as the original diagram while accurately representing the system's architecture.
 
 
 ### Diagram 6: Main Algorithm Flowchart
@@ -685,89 +706,77 @@ Each flow corresponds to specific methods in our class diagram, showing the deta
 ```mermaid
 flowchart TD
     
-    %% Authentication Loop (Bottom)
-    subgraph Auth["Authentication"]
+    %% Main Control Loop (Top)
+    subgraph Main["Main Control"]
         direction LR
-        InitDone --> Idle["Idle"]
-        Idle --> KeyPress{"Key?"}
-        KeyPress -->|No| Idle
-        KeyPress -->|Yes| Special{"'D'"?}
-        Special -->|No| Check["Check Code"]
-        Special -->|Yes| Program["Program Mode"]
-        Check --> Access{"Access OK?"}
-        Access -->|Yes| Grant["Grant Access"]
-        Access -->|No| Deny["Deny Access"]
-        Program --> Save["Save New Code"]
-        Grant & Deny & Save --> Reset["Reset"]
-        Reset --> Idle
+        InitDone --> Idle["Idle State"]
+        Idle --> Input{"Input?"}
+        Input -->|No| Idle
+        Input -->|Yes| Command{"Command Type"}
+        Command -->|"LED Control"| LED["LED Control"]
+        Command -->|"Speed Adjust"| Speed["Speed Control"]
+        LED --> Update["Update State"]
+        Speed --> Update
+        Update --> Idle
     end
+    
+    %% Timer Management (Middle)
+    subgraph Timer["Timer System"]
+        direction LR
+        TInit["Timer Init"] --> TActive["Active"]
+        TActive --> TCheck{"Timeout?"}
+        TCheck -->|No| TActive
+        TCheck -->|Yes| TaskExec["Execute Tasks"]
+        TaskExec --> UpdateDict["Update LED States"]
+        UpdateDict --> Cleanup["Clean Up"]
+        Cleanup --> TActive
+    end
+    
+    %% LED Control System (Bottom)
+    subgraph LED["LED Management"]
+        direction LR
+        LInit["Initialize"] --> LMonitor["Monitor"]
+        LMonitor --> LCheck{"Change?"}
+        LCheck -->|No| LMonitor
+        LCheck -->|Yes| LUpdate["Update State"]
+        LUpdate --> LStore["Store Config"]
+        LStore --> LMonitor
+    end
+    
+    Main --> Timer
+    Timer --> LED
 ```
 ## Results Presentation
+
+
+https://youtu.be/23I5N5CkbIQ
+
+youtube video link
 
 ### Interface Screenshots
 
 The system interface provides clear feedback to the user through the LCD display:
 
-1.  **Startup Screen**:
 
-When starting the program, user is welcomed by this screen:
+Main Photo
 
-```
-Security System
-Enter code:
-
-```
-
-![photo_5346291985331383725_y](https://github.com/user-attachments/assets/c0ada8e1-2832-4c71-b6f5-563a0e9f9bb4)
+![photo_5364303033766374506_y](https://github.com/user-attachments/assets/8facaa30-c3b4-405f-89ad-7bcdb60e9b99)
 
 
 
 
-2.  **Access Granted Screen**:
+Led photo
 
-If the user inputs the correct password via keypad - initially '1234' then the led turns green and 'Acess Granted!' is displayed on the lcd
-
-```
-Access Granted!
-
-```
-
-![photo_5343932201449941279_y](https://github.com/user-attachments/assets/1faf71f4-efcc-49d7-aef1-a23a47534d93)
+![photo_5364303033766374505_y](https://github.com/user-attachments/assets/2aa829ca-d5fd-42a9-a3af-d0cb71b3e712)
 
 
-3.  **Access Denied Screen**:
+Screen photo
 
-If the user inputs the wrong password via keypad - initially '1234' then the led turns red and 'Acess Denied!' is displayed on the lcd
-
-```
-Access Denied!
-
-```
-
-![photo_5346291985331383724_y](https://github.com/user-attachments/assets/6e9fc170-620e-4088-84ff-5c41353ac2b1)
-
-by long pressing 'D' on the keypad the suer can enter programming mode where they can set the new password to be used later
-
-4.  **Programming Mode Screen**:
-
-```
-New Code:
-
-```
-
-![photo_5343932201449941278_y](https://github.com/user-attachments/assets/eb0009ca-067f-48b2-9f47-cd24943a2417)
+![photo_5364303033766374504_y](https://github.com/user-attachments/assets/62e28415-b905-4e6c-8c31-f328ce9d0aa9)
 
 
-5.  **Code Updated Screen**:
 
-After setting the enw password the user is notified that the password has changed
 
-```
-Code updated!
-
-```
-
-![photo_5343932201449941277_y](https://github.com/user-attachments/assets/77d3f807-2e33-46c7-8fc3-7ec44c55c623)
 
 
 These screens provide a simple but effective user interface, clearly communicating the system's state and expected actions.
@@ -789,102 +798,68 @@ All components are connected according to the electrical schematic described ear
 When operating in Serial mode, the system produces output like:
 
 ```
-Security System
-Enter code:
-1
-2
-3
-4
-Access Granted!
-Enter code:
+key 3
+key 3
+Already at max spd.
+key 3
+Already at max spd.
 
 ```
 
-When an incorrect code is entered:
 
-```
-Enter code:
-5
-6
-7
-8
-Access Denied!
-Enter code:
 
-```
-
-In programming mode:
-
-```
-Enter code:
-[D key held]
-New Code:
-9
-8
-7
-6
-Code updated!
-Enter code:
-
-```
-
-These serial outputs mirror what would be shown on the LCD in LCD/Keypad mode, providing a consistent user experience across interfaces.
-
-This functions because the IO module has 2 diffeerent modes of operation, it eithe rredirects stdio to serial monitor or to the lcd and keypad, this can be toggled in the main file.
+This functions because the IO module has 2 diffeerent modes of operation, it either redirects stdio to serial monitor or to the lcd and keypad, this can be toggled in the main file.
 
 See Code annex [5]
+The implemented LED control system demonstrates robust performance characteristics with several notable strengths and areas for improvement:
 
-## Conclusion
+Strengths:
 
-### Performance Analysis
+Precise timing control through dual-timer configuration (Timer1: 50ms, Timer2: 1ms)
+Efficient LED state management using the LedManager class
+Flexible blinking pattern customization through dictionary-based configuration
+Real-time parameter adjustment capabilities (speed control via '2'/'3' commands)
+Resource-efficient implementation suitable for microcontroller environments
+Limitations:
 
-The implemented security system performs well for its intended purpose, with several notable characteristics:
+Fixed timer intervals limiting fine-grained timing control
+Single-character command interface constraining user interaction
+No persistence of LED configurations across power cycles
+Limited error handling for invalid commands
+Basic logging functionality without advanced diagnostics
+Improvement Opportunities:
 
-**Strengths:**
+Implement EEPROM storage for saving custom LED configurations
+Add multi-command sequences for complex lighting patterns
+Develop comprehensive error handling and recovery mechanisms
+Create advanced timing modes with variable intervals
+Integrate with external sensors for automated control
+Technology Impact in Real Applications
+The system demonstrates versatile capabilities applicable across various domains:
 
-1.  Responsive user interface with minimal latency
-2.  Reliable key detection with debouncing
-3.  Flexible I/O options (Serial or LCD/Keypad)
-4.  Modular design for easy maintenance and extension
-5.  Low memory footprint suitable for Arduino's limited resources
+Automotive Systems
+Dashboard indicator lights
+Warning light systems
+Status indication panels
+Industrial Automation
+Machine status indicators
+Safety alert systems
+Process monitoring displays
+Consumer Electronics
+Device status LEDs
+User feedback systems
+Power state indicators
+Educational Tools
+Teaching embedded systems concepts
+Demonstrating interrupt handling
+Illustrating timing control principles
+The modular architecture and efficient resource utilization make this implementation particularly valuable for resource-constrained embedded systems, where predictable behavior and reliable operation are crucial requirements.
 
-**Limitations:**
-
-1.  Fixed code length (4 digits) - not configurable at runtime
-2.  Single user code - no multi-user support
-3.  No persistent storage for codes (lost on power cycle)
-4.  Limited security features (no lockout after failed attempts)
-5.  No network connectivity for remote monitoring or management
-
-**Improvement Opportunities:**
-
-1.  Implement EEPROM storage for persistent code storage
-2.  Add multiple user support with different access levels
-3.  Implement a lockout mechanism after multiple failed attempts
-4.  Add timeout features for enhanced security
-5.  Integrate with other systems (door lock control, alarm system)
-
-### Technology Impact in Real Applications
-
-The security system implemented here represents a foundational approach that can be expanded for various real-world applications:
-
-1.  **Smart Home Integration**: Could be enhanced to interface with home automation systems, providing authenticated access to smart home controls.
-    
-2.  **Commercial Access Control**: With minor enhancements like RFID or fingerprint sensor integration, could serve as a low-cost access control solution for small businesses.
-    
-3.  **Educational Tool**: Serves as an excellent platform for teaching embedded systems concepts, combining hardware interfacing, user interface design, and security considerations.
-    
-4.  **Industrial Equipment Protection**: Could be adapted to protect access to industrial machinery or equipment, requiring operator authentication before use.
-    
-
-The modular design principles demonstrated in this project are widely applicable in commercial embedded systems, where reliability, maintainability, and extensibility are critical requirements.
-
-### References
-
-1.  Arduino Official Documentation - [Arduino Reference](https://www.arduino.cc/reference/en/)
-2.  Liquid Crystal I2C Library - [Arduino LiquidCrystal_I2C](https://github.com/johnrickman/LiquidCrystal_I2C)
-3.  Embedded Systems Design: A Unified Hardware/Software Introduction - [Book by Frank Vahid and Tony Givargis](https://www.wiley.com/en-us/Embedded+System+Design%3A+A+Unified+Hardware+Software+Introduction-p-9780471386780)
-4.  Security in Embedded Systems: A Model-Based Approach - [IEEE Paper](https://ieeexplore.ieee.org/document/7975337)
+References
+Arduino Official Documentation - [Arduino Reference](https://www.arduino.cc/reference/en/)
+ATmega328P Datasheet - [Microchip ATmega328P](https://ww1.microchip.com/downloads/en/DeviceDoc/ATmega48A-48PA-88A-88PA-168A-168PA-328P-328PA-DS-DS40002033.pdf)
+Embedded Systems Design: A Unified Hardware/Software Introduction - [Book by Frank Vahid and Tony Givargis](https://www.wiley.com/en-us/Embedded+System+Design%3A+A+Unified+Hardware+Software+Introduction-p-9780471386780)
+AVR Interrupt Handling Guide - [AVR-GCC Wiki](https://wiki.osdev.org/AVR_Interrupts)
 
 ### Code annex
 [1]:
@@ -995,6 +970,197 @@ void IO::init(IOMode mode) {
 }
 ```
 
+
+[6]:
+```
+#include <Arduino.h>
+#include "io.h"
+#include "Logger.h"
+#include "LedManager.h"
+#include "map"
+#include "TimerConfigs.h"
+
+#define KEYPAD_PIN 4     // First pin for keypad (needs 8 consecutive pins)
+#define LCD_ADDRESS 0x27 // I2C address for LCD
+#define LCD_COLS 16      // LCD columns
+#define LCD_ROWS 2       // LCD rows
+#define GREEN_LED 13     // Success LED
+#define RED_LED 12       // Error LED
+#define OTHER_LED 2      // Other LED
+
+uint16_t timerMultiple = 0;
+std::map<int, std::map<String, int>> dict;
+volatile int green_led_state = 0;
+
+// in ms
+volatile int taskA_rec = 500;
+volatile int taskA_offset = 1000;
+volatile int taskA_cnt = taskA_offset;
+
+volatile int taskB_rec = 50;
+volatile int taskB_offset = 200;
+volatile int taskB_cnt = taskB_offset;
+
+volatile int taskC_rec = 25;
+volatile int taskC_offset = 300;
+volatile int taskC_cnt = taskC_offset;
+
+volatile int RED_LED_interval = 250;
+volatile char c;
+
+void setup()
+{
+
+    Serial.begin(9600);
+
+    IO::init(IO::LCD_KEYPAD_MODE);
+    IO::initKeypad(KEYPAD_PIN);
+    IO::initLCD(LCD_ADDRESS, LCD_COLS, LCD_ROWS);
+
+    setTimerInterval(1, 50, 'm'); // Timer1: 50 milliseconds
+    setTimerInterval(2, 1, 'm');  // Timer2: 1 milisecond
+
+    pinMode(GREEN_LED, OUTPUT);
+    pinMode(RED_LED, OUTPUT);
+    pinMode(OTHER_LED, OUTPUT);
+
+    cli(); // Disable interrupts during setup
+    TCCR1A = 0;
+    TCCR1B = 0;
+    TCCR1B |= B00000101;   // Set prescaler to 1024
+    TIMSK1 |= B00000010;   // Enable compare match interrupt (OCIE1A)
+    OCR1A = TIMER1_PULSES; // Set compare match register A
+
+    TCCR2A = 0;
+    TCCR2B = 0;
+    TCCR2B |= B00000011;   // Set prescaler to 64
+    TIMSK2 |= B00000010;   // Enable compare match interrupt (OCIE2A)
+    OCR2A = TIMER2_PULSES; // Set compare match register A
+
+    sei(); // Enable interrupts
+
+    Logger::printf("Timer1 Count: %d", TIMER1_COUNT);
+    Logger::printf("Timer2 Count: %d", TIMER2_COUNT);
+
+    LedManager::blink_init(dict, 50);
+
+}
+
+void blink_check_new()
+{
+    timerMultiple++;
+    int elapsedTime = TIMER1_INTERVAL_MS * timerMultiple;
+
+    for (auto &pin_data : dict)
+    {
+        // .first - key .second - value
+
+        if (elapsedTime % pin_data.second["interval"] == 0)
+        {
+            LedManager::toggle(pin_data.first);
+
+            if (pin_data.second["times"] > 0)
+            {
+                pin_data.second["times"] -= 1;
+            }
+
+            if (pin_data.second["times"] == 0)
+            {
+                dict.erase(pin_data.first);
+            }
+        }
+    }
+
+    if (timerMultiple >= TIMER1_COUNT)
+    {
+        timerMultiple = 0;
+    }
+}
+
+void loop()
+{
+    c = (volatile char)getchar();
+    IO::clearLCD();
+
+    // Idle time
+    printf("A:%d B:%d C:%d\n",taskA_cnt,taskB_cnt,taskC_cnt);
+    printf("Green:%d Red:%d\n", green_led_state,RED_LED_interval);
+}
+
+void taskA()
+{
+    if (c == '1')
+    {
+        LedManager::toggle(GREEN_LED);
+        green_led_state = !green_led_state;
+        Logger::printf("%d", green_led_state);
+        c = '\0';
+    }
+}
+void taskB()
+{
+    if (!green_led_state)
+    {
+        LedManager::blink(dict, RED_LED, -1, RED_LED_interval);
+    }
+    else
+    {
+        dict.erase(RED_LED);
+        LedManager::off(RED_LED);
+    }
+}
+void taskC()
+{
+    if (c == '2')
+    {
+        c = '\0';
+        if (RED_LED_interval <= 50)
+        {
+            Logger::printf("Already at min spd.");
+
+            return;
+        }
+        RED_LED_interval -= 50;
+    }
+    if (c == '3')
+    {
+        c = '\0';
+
+        if (RED_LED_interval >= 950)
+        {
+            Logger::printf("Already at max spd.");
+            return;
+        }
+        RED_LED_interval += 50;
+    }
+}
+ISR(TIMER1_COMPA_vect)
+{
+    blink_check_new();
+    TCNT1 = 0;
+}
+
+ISR(TIMER2_COMPA_vect)
+{
+    if (--taskA_cnt == 0)
+    {
+        taskA();
+        taskA_cnt = taskA_rec;
+    }
+    if (--taskB_cnt == 0)
+    {
+        taskB();
+        taskB_cnt = taskB_rec;
+    }
+    if (--taskC_cnt == 0)
+    {
+        taskC();
+        taskC_cnt = taskC_rec;
+    }
+    TCNT2 = 0;
+}
+
+```
 
 ## AI Note
 

@@ -1,19 +1,20 @@
 #pragma once
-#include "ILedManager.h"
+#include "BlinkList.h"
+#include <assert.h>
+#include "map"
+#include "Arduino.h"
 
 class LedManager {
 public:
-    static void setDebugMode(bool enabled);
+    // Static methods for LED control
     static int checkPin(int pin);
     static void on(int pin);
     static void off(int pin);
+    static void set(int pin, int state);
     static void toggle(int pin);
-    static void blink(int pin, int times = -1, int onTime = 500, int offTime = 500);
-    static void check_group(LinkedList& pins);
-    static void on_group(LinkedList& pins);
-    static void off_group(LinkedList& pins);
-    static void blink_group(LinkedList& pins, int times = -1, int onTime = 500, int offTime = 500);
-    static void blink_group_async(LinkedList& pins, int times = -1, int onTime = 500, int offTime = 500);
+    static void blink(std::map<int, std::map<String, int>>& list, int pin, int times = -1, int delayMs = 500);
+    static void blink_init(std::map<int, std::map<String, int>>& list, int timer_interval);
+
 private:
-    static ILedManager* impl;
+    static int base_timer_interval; // Stores the base timer interval for blink operations
 };

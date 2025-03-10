@@ -1,5 +1,6 @@
 // IO.cpp - Implementation of IO functions
 #include "IO.h"
+#include "Logger.h"
 
 // Initialize static variables
 LiquidCrystal_I2C IO::lcd(0x27, 16, 2);
@@ -16,7 +17,7 @@ const char IO::keys[4][4] = {
     {'1', '2', '3', 'A'},
     {'4', '5', '6', 'B'},
     {'7', '8', '9', 'C'},
-    {'*', '0', '#', 'D'}
+    {'*', '0', '#', '\n'}
 };
 
 const unsigned long IO::HOLD_THRESHOLD = 1500; // 1.5 seconds
@@ -92,6 +93,7 @@ int IO::keypad_getchar(FILE* f) {
                         delay(10);
                     }
                     delay(50); // Debounce
+                    Logger::printf("key %c",key);
                 }
             }
             
