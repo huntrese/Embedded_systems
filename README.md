@@ -813,6 +813,8 @@ This functions because the IO module has 2 diffeerent modes of operation, it eit
 See Code annex [5]
 The implemented LED control system demonstrates robust performance characteristics with several notable strengths and areas for improvement:
 
+## Conclusion
+
 Strengths:
 
 Precise timing control through dual-timer configuration (Timer1: 50ms, Timer2: 1ms)
