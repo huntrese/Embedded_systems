@@ -1,5 +1,6 @@
 // IO.cpp - Implementation of IO functions
 #include "IO.h"
+#include "Logger.h"
 
 // Initialize static variables
 LiquidCrystal_I2C IO::lcd(0x27, 16, 2);
@@ -92,6 +93,7 @@ int IO::keypad_getchar(FILE* f) {
                         delay(10);
                     }
                     delay(50); // Debounce
+                    Logger::printf("key %c",key);
                 }
             }
             

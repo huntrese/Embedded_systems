@@ -11,6 +11,16 @@ volatile uint16_t TIMER1_COUNT;
 volatile uint32_t TIMER1_PULSES;
 uint16_t TIMER1_INTERVAL_MS;
 
+// Timer 0 Configuration (8-bit timer)
+const uint32_t TIMER0_MAX = 256;
+const uint32_t TIMER0_CLOCKRATE = 8000000UL;
+const int TIMER0_PRESCALER = 64;
+const double TIMER0_SPEED = (double)TIMER0_CLOCKRATE / TIMER0_PRESCALER;
+const double TIMER0_TICK = 1.0 / TIMER0_SPEED;
+volatile uint8_t TIMER0_COUNT;
+volatile uint32_t TIMER0_PULSES;
+uint16_t TIMER0_INTERVAL_MS;
+
 // Timer 2 Configuration (8-bit timer)
 const uint32_t TIMER2_MAX = 256;
 const uint32_t TIMER2_CLOCKRATE = 8000000UL;
@@ -106,6 +116,11 @@ inline void setTimerInterval(int timerNum, double value, char unit) {
         TIMER1_PULSES = round(rounded_interval / (TIMER1_TICK * 1000.0));
         TIMER1_COUNT = TIMER1_PULSES % TIMER1_MAX;
         TIMER1_INTERVAL_MS = rounded_interval;
+    } else if (timerNum == 0) {
+        // Calculate number of timer ticks needed for the interval
+        TIMER0_PULSES = round(rounded_interval / (TIMER0_TICK * 1000.0));
+        TIMER0_COUNT = TIMER0_PULSES % TIMER0_MAX;
+        TIMER0_INTERVAL_MS = rounded_interval;
     } else if (timerNum == 2) {
         // Calculate number of timer ticks needed for the interval
         TIMER2_PULSES = round(rounded_interval / (TIMER2_TICK * 1000.0));
