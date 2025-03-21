@@ -108,23 +108,31 @@ int IO::keypad_getchar(FILE* f) {
 
 void IO::init(IOMode mode) {
     currentMode = mode;
-    
+
     if (mode == SERIAL_MODE) {
-        Serial.begin(9600);
-        while (!Serial) delay(10);
+        Serial.begin(115200);  // ESP32 supports higher speeds, 115200 is more standard
+        delay(100);
     }
-    
-    // Setup stdin/stdout
-    static FILE stream;
-    
-    if (mode == SERIAL_MODE) {
-        fdev_setup_stream(&stream, serial_putchar, serial_getchar, _FDEV_SETUP_RW);
-    } else {
-        fdev_setup_stream(&stream, lcd_putchar, keypad_getchar, _FDEV_SETUP_RW);
-    }
-    
-    stdin = stdout = &stream;
+
+    #ifndef ESP32  // AVR-based systems
+        // Setup stdin/stdout using fdev_setup_stream for AVR
+        static FILE stream;
+        if (mode == SERIAL_MODE) {
+            fdev_setup_stream(&stream, serial_putchar, serial_getchar, _FDEV_SETUP_RW);
+        } else {
+            fdev_setup_stream(&stream, lcd_putchar, keypad_getchar, _FDEV_SETUP_RW);
+        }
+        stdin = stdout = &stream;
+    #else
+        // ESP32 uses built-in Serial functions, no need for fdev_setup_stream
+        if (mode == SERIAL_MODE) {
+            Serial.println("ESP32 Serial Mode Active");
+        } else {
+            Serial.println("ESP32 LCD/Keypad Mode Active");
+        }
+    #endif
 }
+
 
 void IO::initLCD(uint8_t address, uint8_t cols, uint8_t rows) {
     lcd = LiquidCrystal_I2C(address, cols, rows);
