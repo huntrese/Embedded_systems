@@ -1,118 +1,134 @@
+// main.cpp
 #include "Arduino.h"
-#include "LedManager.h"
-#include "io.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "freertos/semphr.h"
-#include "freertos/queue.h"
+#include "SoundSensor.h"
+#include "SignalManager.h"
+#include "DisplayManager.h"
+#include "LedManager.h"
 
-#define BUTTON_PIN 12  // Button on GPIO 12
-#define LED_PIN 13    // LED on GPIO 13
+// Task handles
+TaskHandle_t sensorTaskHandle = NULL;
+TaskHandle_t displayTaskHandle = NULL;
 
-// Global variables for synchronization and data
-SemaphoreHandle_t xButtonSemaphore;  // Binary semaphore
-QueueHandle_t xQueue;               // Queue for Task2 -> Task3 communication
-volatile int N = 0;                 // Counter variable
+// Constants
+constexpr int SENSOR_TASK_STACK_SIZE = 2048;
+constexpr int DISPLAY_TASK_STACK_SIZE = 2048;
+constexpr int SENSOR_TASK_PRIORITY = 2;
+constexpr int DISPLAY_TASK_PRIORITY = 1;
+constexpr int SENSOR_ACQUISITION_INTERVAL_MS = 2; // 100ms sensor acquisition
+constexpr int DISPLAY_UPDATE_INTERVAL_MS = 500;     // 500ms display update
 
-// Task 1: Button LED - Detects button press and raises semaphore
-void TaskButtonLed(void *pvParameters) {
-    TickType_t xLastWakeTime = xTaskGetTickCount();
-    pinMode(BUTTON_PIN, INPUT_PULLUP);
-    pinMode(LED_PIN, OUTPUT);
-    
-    while (1) {
-        if (!LedManager::checkPin(BUTTON_PIN)) {  // Button pressed
-            LedManager::on(LED_PIN);
-            vTaskDelay(pdMS_TO_TICKS(1000));  // LED on for 1s
-            LedManager::off(LED_PIN);
-            xSemaphoreGive(xButtonSemaphore);  // Signal to Task 2
-        }
-        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));  // 10ms recurrence
-    }
-}
+// Create instances of sensor and signal manager
+SoundSensor soundSensor;
+SignalManager signalManager;
+DisplayManager displayManager;
+std::map<int, std::map<String, int>> blinkList;
 
-// Task 2: Sync Task - Waits for semaphore, increments N, sends data
-void TaskSync(void *pvParameters) {
-    uint8_t buffer[20];
-    while (1) {
-        if (xSemaphoreTake(xButtonSemaphore, portMAX_DELAY)) {  // Wait for signal
-            N++;
-            printf("Task 2: N incremented -> %d\n", N);
-            for (int i = 0; i < N; i++) buffer[i] = i + 1;
-            xQueueSendToFront(xQueue, buffer, portMAX_DELAY);  // Send to queue
-            
-            // LED blinks N times
-            for (int i = 0; i <= N; i++) {
-                LedManager::on(LED_PIN);
-                vTaskDelay(pdMS_TO_TICKS(300));
-                LedManager::off(LED_PIN);
-                vTaskDelay(pdMS_TO_TICKS(500));
-            }
-        }
-        vTaskDelay(pdMS_TO_TICKS(50));  // Pause between executions
-    }
-}
+// Task functions
+void sensorAcquisitionTask(void *pvParameters);
+void displayUpdateTask(void *pvParameters);
 
-// Task 3: Async Task - Reads from queue and displays on Serial
-void TaskAsync(void *pvParameters) {
-    uint8_t receivedBuffer[20];
-    while (1) {
-        if (xQueueReceive(xQueue, receivedBuffer, pdMS_TO_TICKS(200))) {
-            printf("Task 3: Data received -> ");
-            for (int i = 0; i < N; i++) {
-                printf("%d ", receivedBuffer[i]);
-            }
-            printf("\n");
-        }
-        vTaskDelay(pdMS_TO_TICKS(200));  // 200ms recurrence
-    }
-}
-
-// Task 4: Statistics Task - Monitors system statistics with mutex protection
-typedef struct {
-    uint32_t totalDataTransfers;
-    uint32_t maxNValue;
-} SystemStats_t;
-
-SystemStats_t systemStats;
-SemaphoreHandle_t xStatsMutex; // Changed from MutexHandle_t to SemaphoreHandle_t
-
-void TaskStatistics(void *pvParameters) {
-    TickType_t xLastWakeTime = xTaskGetTickCount();
-    while (1) {
-        if (xSemaphoreTake(xStatsMutex, portMAX_DELAY) == pdTRUE) { // Changed to xSemaphoreTake
-            systemStats.totalDataTransfers += N;
-            if (N > systemStats.maxNValue) {
-                systemStats.maxNValue = N;
-            }
-            printf("System Statistics:\n");
-            printf("- Total data transfers: %lu\n", systemStats.totalDataTransfers);
-            printf("- Max N value: %lu\n", systemStats.maxNValue);
-            printf("---------------------\n");
-            xSemaphoreGive(xStatsMutex); // Changed to xSemaphoreGive
-        }
-        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(5000));
-    }
-}
-
-void setup() {
+void setup()
+{
+    // Initialize Serial communication
     Serial.begin(115200);
-    IO::init();
-    // Initialize mutex for statistics
-    xStatsMutex = xSemaphoreCreateMutex(); // Create mutex semaphore
-    // Initialize statistics
-    memset(&systemStats, 0, sizeof(SystemStats_t));
-    // Create synchronization objects
-    xButtonSemaphore = xSemaphoreCreateBinary();
-    xQueue = xQueueCreate(5, sizeof(uint8_t) * 20);
-    
-    // Create all tasks
-    xTaskCreatePinnedToCore(TaskButtonLed, "Task Button", 4096, NULL, 1, NULL, 0);
-    xTaskCreatePinnedToCore(TaskSync, "Task Sync", 4096, NULL, 1, NULL, 0);
-    xTaskCreatePinnedToCore(TaskAsync, "Task Async", 4096, NULL, 1, NULL, 1);
-    xTaskCreatePinnedToCore(TaskStatistics, "Task Stats", 4096, NULL, 1, NULL, 1);
+    delay(1000); // Give some time for serial to initialize
+
+    // Initialize IO module for LCD and Serial redirection
+    IO::init(IO::SERIAL_MODE);
+
+    // Initialize modules
+    soundSensor.init();
+    signalManager.init();
+    displayManager.init();
+
+    // Initialize LED blink list and configure timer
+    LedManager::blink_init(blinkList, 50); // 50ms base timer interval
+
+    // Initialize the onboard LED
+    pinMode(2, OUTPUT);
+
+    // Create tasks
+    xTaskCreate(
+        sensorAcquisitionTask,  // Task function
+        "SensorTask",           // Task name
+        SENSOR_TASK_STACK_SIZE, // Stack size
+        NULL,                   // Parameters
+        SENSOR_TASK_PRIORITY,   // Priority
+        &sensorTaskHandle       // Task handle
+    );
+
+    xTaskCreate(
+        displayUpdateTask,       // Task function
+        "DisplayTask",           // Task name
+        DISPLAY_TASK_STACK_SIZE, // Stack size
+        NULL,                    // Parameters
+        DISPLAY_TASK_PRIORITY,   // Priority
+        &displayTaskHandle       // Task handle
+    );
 }
 
-void loop() {
-    vTaskDelay(portMAX_DELAY);  // Main task inactive
+void loop()
+{
+    // Empty - FreeRTOS manages task execution
+    vTaskDelay(1000 / portTICK_PERIOD_MS); // Prevent watchdog timeout
+}
+void sensorAcquisitionTask(void *pvParameters)
+{
+    TickType_t xLastWakeTime;
+    xLastWakeTime = xTaskGetTickCount();
+    
+    bool previousSoundState = false;
+    bool ledState = false;
+    TickType_t lastToggleTime = 0;
+    const TickType_t DEBOUNCE_DELAY_MS = pdMS_TO_TICKS(50); // 50ms debounce delay
+    
+    while (1)
+    {
+        // Get sensor readings
+        SensorData data = soundSensor.readSensor();
+        bool currentSoundState = (signalManager.getSystemStatus().currentState == SOUND_DETECTED);
+        
+        // Check for rising edge with debounce
+        if (data.digitalValue)
+        {
+            TickType_t currentTime = xTaskGetTickCount();
+            
+            // Only toggle if enough time has passed since last toggle
+            if ((currentTime - lastToggleTime) > DEBOUNCE_DELAY_MS)
+            {
+                ledState = !ledState;
+                digitalWrite(2, ledState);
+                Serial.println("🔥 Sound Detected! Toggling LED");
+                lastToggleTime = currentTime;
+            }
+        }
+        
+        previousSoundState = currentSoundState;
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(SENSOR_ACQUISITION_INTERVAL_MS));
+    }
+}
+
+// Display update task
+void displayUpdateTask(void *pvParameters)
+{
+    // Add a small offset to avoid task overlap
+    vTaskDelay(pdMS_TO_TICKS(50));
+
+    TickType_t xLastWakeTime;
+    xLastWakeTime = xTaskGetTickCount();
+
+    while (1)
+    {
+        // Get current signal status
+        SensorData data = signalManager.getCurrentData();
+        SystemStatus status = signalManager.getSystemStatus();
+
+        // Update display
+        displayManager.updateDisplay(data, status);
+
+        // Precise timing using vTaskDelayUntil
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(DISPLAY_UPDATE_INTERVAL_MS));
+    }
 }
