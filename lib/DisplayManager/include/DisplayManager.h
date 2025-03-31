@@ -1,4 +1,5 @@
 #pragma once
+#include "config.h" // For ProcessedData struct
 #include "Arduino.h"
 #include "IO.h"
 #include "SoundSensor.h"
@@ -12,8 +13,10 @@ constexpr int LCD_ROWS = 2;        // Number of rows on LCD
 class DisplayManager {
 public:
   DisplayManager();
-  void init();
+  static void init();
   void updateDisplay(const SensorData& data, const SystemStatus& status);
+  static void printData(const ProcessedData &data);
+
   
 private:
   unsigned long lastStdioDisplayTime;
@@ -22,6 +25,7 @@ private:
   // Helper functions
   void displayOnLCD(const SensorData& data, const SystemStatus& status);
   void displayOnSerial(const SensorData& data, const SystemStatus& status);
+
   
   // System state to string
   const char* getStateString(SystemState state);

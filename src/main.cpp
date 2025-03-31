@@ -1,134 +1,141 @@
-// main.cpp
 #include "Arduino.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "SoundSensor.h"
-#include "SignalManager.h"
+#include "freertos/semphr.h" // Required for mutex
+#include "config.h"
+#include "SensorReader.h"
+#include "SignalConditioner.h"
 #include "DisplayManager.h"
-#include "LedManager.h"
+// #include "IO.h" // Include if using a specific IO redirection class
 
-// Task handles
-TaskHandle_t sensorTaskHandle = NULL;
+// --- Task Handles ---
+TaskHandle_t acquisitionTaskHandle = NULL;
 TaskHandle_t displayTaskHandle = NULL;
 
-// Constants
-constexpr int SENSOR_TASK_STACK_SIZE = 2048;
-constexpr int DISPLAY_TASK_STACK_SIZE = 2048;
-constexpr int SENSOR_TASK_PRIORITY = 2;
-constexpr int DISPLAY_TASK_PRIORITY = 1;
-constexpr int SENSOR_ACQUISITION_INTERVAL_MS = 2; // 100ms sensor acquisition
-constexpr int DISPLAY_UPDATE_INTERVAL_MS = 500;     // 500ms display update
+// --- Shared Data & Mutex ---
+ProcessedData sharedSensorData;
+SemaphoreHandle_t dataMutex;
 
-// Create instances of sensor and signal manager
-SoundSensor soundSensor;
-SignalManager signalManager;
-DisplayManager displayManager;
-std::map<int, std::map<String, int>> blinkList;
+// --- Peripheral Instances ---
+SensorReader ldrSensor(LDR_PIN);
+SignalConditioner signalProcessor;
+// DisplayManager is static, no instance needed
 
-// Task functions
-void sensorAcquisitionTask(void *pvParameters);
-void displayUpdateTask(void *pvParameters);
+// --- Task Function Prototypes ---
+void acquisitionTask(void *pvParameters);
+void displayTask(void *pvParameters);
 
-void setup()
-{
-    // Initialize Serial communication
+void setup() {
     Serial.begin(115200);
-    delay(1000); // Give some time for serial to initialize
+    delay(1000); // Wait for serial monitor
+    printf("System Setup Started...\n");
 
-    // Initialize IO module for LCD and Serial redirection
-    IO::init(IO::SERIAL_MODE);
+    // Initialize IO if needed (assuming Serial.begin handles printf redirection)
+    // IO::init(IO::SERIAL_MODE);
 
-    // Initialize modules
-    soundSensor.init();
-    signalManager.init();
-    displayManager.init();
+    // Initialize Modules
+    ldrSensor.init();
+    signalProcessor.init();
+    DisplayManager::init(); // Static init
 
-    // Initialize LED blink list and configure timer
-    LedManager::blink_init(blinkList, 50); // 50ms base timer interval
+    // Create Mutex for shared data
+    dataMutex = xSemaphoreCreateMutex();
+    if (dataMutex == NULL) {
+        printf("ERROR: Failed to create data mutex!\n");
+        // Handle error - perhaps halt or loop infinitely
+        while(1);
+    }
 
-    // Initialize the onboard LED
-    pinMode(2, OUTPUT);
-
-    // Create tasks
+    // Create Acquisition Task
     xTaskCreate(
-        sensorAcquisitionTask,  // Task function
-        "SensorTask",           // Task name
-        SENSOR_TASK_STACK_SIZE, // Stack size
-        NULL,                   // Parameters
-        SENSOR_TASK_PRIORITY,   // Priority
-        &sensorTaskHandle       // Task handle
+        acquisitionTask,
+        "AcquisitionTask",
+        ACQUISITION_TASK_STACK_SIZE,
+        NULL, // No parameters passed
+        ACQUISITION_TASK_PRIORITY,
+        &acquisitionTaskHandle
     );
 
+    // Create Display Task
     xTaskCreate(
-        displayUpdateTask,       // Task function
-        "DisplayTask",           // Task name
-        DISPLAY_TASK_STACK_SIZE, // Stack size
-        NULL,                    // Parameters
-        DISPLAY_TASK_PRIORITY,   // Priority
-        &displayTaskHandle       // Task handle
+        displayTask,
+        "DisplayTask",
+        DISPLAY_TASK_STACK_SIZE,
+        NULL, // No parameters passed
+        DISPLAY_TASK_PRIORITY,
+        &displayTaskHandle
     );
+
+    printf("Setup complete. Tasks created.\n");
+    // No need to explicitly start the scheduler, it starts automatically
+    // after setup() returns in Arduino FreeRTOS implementations.
 }
 
-void loop()
-{
-    // Empty - FreeRTOS manages task execution
-    vTaskDelay(1000 / portTICK_PERIOD_MS); // Prevent watchdog timeout
+void loop() {
+    // Keep loop empty or add minimal watchdog feeding if necessary
+    vTaskDelay(pdMS_TO_TICKS(1000)); // Delay 1 second
 }
-void sensorAcquisitionTask(void *pvParameters)
-{
+
+// --- Task Implementations ---
+
+void acquisitionTask(void *pvParameters) {
+    printf("Acquisition Task started.\n");
     TickType_t xLastWakeTime;
+    const TickType_t xFrequency = pdMS_TO_TICKS(ACQUISITION_INTERVAL_MS);
+
+    // Initialize the xLastWakeTime variable with the current time.
     xLastWakeTime = xTaskGetTickCount();
-    
-    bool previousSoundState = false;
-    bool ledState = false;
-    TickType_t lastToggleTime = 0;
-    const TickType_t DEBOUNCE_DELAY_MS = pdMS_TO_TICKS(50); // 50ms debounce delay
-    
-    while (1)
-    {
-        // Get sensor readings
-        SensorData data = soundSensor.readSensor();
-        bool currentSoundState = (signalManager.getSystemStatus().currentState == SOUND_DETECTED);
-        
-        // Check for rising edge with debounce
-        if (data.digitalValue)
-        {
-            TickType_t currentTime = xTaskGetTickCount();
-            
-            // Only toggle if enough time has passed since last toggle
-            if ((currentTime - lastToggleTime) > DEBOUNCE_DELAY_MS)
-            {
-                ledState = !ledState;
-                digitalWrite(2, ledState);
-                Serial.println("🔥 Sound Detected! Toggling LED");
-                lastToggleTime = currentTime;
-            }
+
+    while (1) {
+        // 1. Read raw sensor value
+        int rawValue = ldrSensor.readRawValue();
+
+        // 2. Process the value (filter, convert, saturate)
+        ProcessedData currentProcessedData = signalProcessor.processNewRawValue(rawValue);
+
+        // 3. Update shared data structure (protected by mutex)
+        if (xSemaphoreTake(dataMutex, portMAX_DELAY) == pdTRUE) {
+            sharedSensorData = currentProcessedData; // Copy data
+            xSemaphoreGive(dataMutex);
+        } else {
+             printf("ACQ_TASK: Failed to take mutex!\n");
+             // Handle error - maybe skip update this cycle?
         }
-        
-        previousSoundState = currentSoundState;
-        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(SENSOR_ACQUISITION_INTERVAL_MS));
+
+        // 4. Wait for the next cycle using vTaskDelayUntil for precise timing
+        vTaskDelayUntil(&xLastWakeTime, xFrequency);
     }
 }
 
-// Display update task
-void displayUpdateTask(void *pvParameters)
-{
-    // Add a small offset to avoid task overlap
-    vTaskDelay(pdMS_TO_TICKS(50));
+void displayTask(void *pvParameters) {
+    printf("Display Task starting after offset.\n");
+    // Apply initial offset to avoid starting at the exact same time as acquisition
+    vTaskDelay(pdMS_TO_TICKS(DISPLAY_TASK_OFFSET_MS));
+    printf("Display Task started.\n");
 
     TickType_t xLastWakeTime;
+    const TickType_t xFrequency = pdMS_TO_TICKS(DISPLAY_INTERVAL_MS);
+
+    // Initialize the xLastWakeTime variable with the current time.
     xLastWakeTime = xTaskGetTickCount();
 
-    while (1)
-    {
-        // Get current signal status
-        SensorData data = signalManager.getCurrentData();
-        SystemStatus status = signalManager.getSystemStatus();
+    while (1) {
+        ProcessedData dataToDisplay;
 
-        // Update display
-        displayManager.updateDisplay(data, status);
+        // 1. Read shared data structure (protected by mutex)
+        if (xSemaphoreTake(dataMutex, portMAX_DELAY) == pdTRUE) {
+            dataToDisplay = sharedSensorData; // Copy data
+            xSemaphoreGive(dataMutex);
 
-        // Precise timing using vTaskDelayUntil
-        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(DISPLAY_UPDATE_INTERVAL_MS));
+            // 2. Print the data using DisplayManager
+            DisplayManager::printData(dataToDisplay);
+
+        } else {
+             printf("DISP_TASK: Failed to take mutex!\n");
+             // Handle error - maybe skip display this cycle?
+        }
+
+        // 3. Wait for the next cycle using vTaskDelayUntil
+        vTaskDelayUntil(&xLastWakeTime, xFrequency);
     }
 }
