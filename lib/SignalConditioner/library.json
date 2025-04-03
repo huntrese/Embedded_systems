@@ -1,7 +1,7 @@
 {
-    "name": "SensorReader",
+    "name": "SignalConditioner",
     "version": "1.0.0",
-    "description": "A Library designed to provide a easy to use interface for woking with Sensors",
+    "description": "A Library designed to provide a easy to use interface for woking with Signals",
     "keywords": "Light, Darkness, Efficiency",
     "authors":
     [

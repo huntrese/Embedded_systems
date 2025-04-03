@@ -71,7 +71,9 @@ void DisplayManager::displayOnSerial(const SensorData &data, const SystemStatus 
 
   Serial.println("---------------------------");
 }
-static void printData(const ProcessedData &data)
+
+
+void printData(const ProcessedData_float &data)
 {
   // Format and print the data to the Serial monitor using STDIO printf
   printf("------------------------------------\n");

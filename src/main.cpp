@@ -2,7 +2,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h" // Required for mutex
-#include "config.h"
+// #include "config.h"
 #include "SensorReader.h"
 #include "SignalConditioner.h"
 #include "DisplayManager.h"
@@ -13,7 +13,7 @@ TaskHandle_t acquisitionTaskHandle = NULL;
 TaskHandle_t displayTaskHandle = NULL;
 
 // --- Shared Data & Mutex ---
-ProcessedData sharedSensorData;
+ProcessedData_float sharedSensorData; // Or int, depending on your use case
 SemaphoreHandle_t dataMutex;
 
 // --- Peripheral Instances ---
@@ -91,7 +91,7 @@ void acquisitionTask(void *pvParameters) {
         int rawValue = ldrSensor.readRawValue();
 
         // 2. Process the value (filter, convert, saturate)
-        ProcessedData currentProcessedData = signalProcessor.processNewRawValue(rawValue);
+        ProcessedData_float currentProcessedData = signalProcessor.processNewRawValue(rawValue);
 
         // 3. Update shared data structure (protected by mutex)
         if (xSemaphoreTake(dataMutex, portMAX_DELAY) == pdTRUE) {
@@ -120,7 +120,7 @@ void displayTask(void *pvParameters) {
     xLastWakeTime = xTaskGetTickCount();
 
     while (1) {
-        ProcessedData dataToDisplay;
+        ProcessedData_float dataToDisplay;
 
         // 1. Read shared data structure (protected by mutex)
         if (xSemaphoreTake(dataMutex, portMAX_DELAY) == pdTRUE) {

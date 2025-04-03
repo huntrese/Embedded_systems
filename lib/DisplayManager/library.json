@@ -1,7 +1,7 @@
 {
-    "name": "DisplayManager",
+    "name": "DisplayManager1",
     "version": "1.0.0",
-    "description": "A Library designed to provide a easy to use interface for woking with SoundSensor",
+    "description": "A Library designed to provide a easy to use interface for woking with Display",
     "keywords": "Light, Darkness, Efficiency",
     "authors":
     [

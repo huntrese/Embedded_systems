@@ -15,8 +15,8 @@ void SignalConditioner::init() {
     Serial.println("SignalConditioner initialized.");
 }
 
-ProcessedData SignalConditioner::processNewRawValue(int rawValue) {
-    ProcessedData result;
+ProcessedData_float SignalConditioner::processNewRawValue(int rawValue) {
+    ProcessedData_float result;
     result.rawADC = rawValue;
 
     // 1. Apply Median Filter (Salt & Pepper removal)
