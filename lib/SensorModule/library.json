@@ -1,7 +1,7 @@
 {
-    "name": "SignalConditioner",
+    "name": "SensorModule",
     "version": "1.0.0",
-    "description": "A Library designed to provide a easy to use interface for woking with Signal Conditioning",
+    "description": "A Library designed to provide a easy to use interface for woking with Sensors",
     "keywords": "Light, Darkness, Efficiency",
     "authors":
     [
