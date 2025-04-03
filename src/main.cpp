@@ -46,7 +46,7 @@ void setup() {
     Serial.begin(115200);
     delay(1000); // Give some time for serial to initialize
     
-    Serial.println("Starting Signal Conditioning Lab...");
+    printf("Starting Signal Conditioning Lab...\n");
 
     // Initialize mutex for data protection
     dataMutex = xSemaphoreCreateMutex();
@@ -61,154 +61,81 @@ void setup() {
     pinMode(2, OUTPUT);
 
     // Create tasks with offsets to avoid overlap
-    xTaskCreate(
-        sensorAcquisitionTask,  // Task function
-        "SensorTask",           // Task name
-        SENSOR_TASK_STACK_SIZE, // Stack size
-        NULL,                   // Parameters
-        SENSOR_TASK_PRIORITY,   // Priority
-        &sensorTaskHandle       // Task handle
-    );
+    xTaskCreate(sensorAcquisitionTask, "SensorTask", SENSOR_TASK_STACK_SIZE, NULL, SENSOR_TASK_PRIORITY, &sensorTaskHandle);
+    xTaskCreate(signalProcessingTask, "ProcessingTask", PROCESSING_TASK_STACK_SIZE, NULL, PROCESSING_TASK_PRIORITY, &processingTaskHandle);
+    xTaskCreate(displayUpdateTask, "DisplayTask", DISPLAY_TASK_STACK_SIZE, NULL, DISPLAY_TASK_PRIORITY, &displayTaskHandle);
 
-    xTaskCreate(
-        signalProcessingTask,    // Task function
-        "ProcessingTask",        // Task name
-        PROCESSING_TASK_STACK_SIZE, // Stack size
-        NULL,                    // Parameters
-        PROCESSING_TASK_PRIORITY,// Priority
-        &processingTaskHandle    // Task handle
-    );
-
-    xTaskCreate(
-        displayUpdateTask,       // Task function
-        "DisplayTask",           // Task name
-        DISPLAY_TASK_STACK_SIZE, // Stack size
-        NULL,                    // Parameters
-        DISPLAY_TASK_PRIORITY,   // Priority
-        &displayTaskHandle       // Task handle
-    );
-
-    Serial.println("All tasks initialized and started");
+    printf("All tasks initialized and started\n");
 }
 
 void loop() {
     // Empty - FreeRTOS manages task execution
     vTaskDelay(1000 / portTICK_PERIOD_MS); // Prevent watchdog timeout
 }
-
-// Task for sensor data acquisition
 void sensorAcquisitionTask(void *pvParameters) {
-    TickType_t xLastWakeTime;
-    xLastWakeTime = xTaskGetTickCount();
-    
-    Serial.println("Sensor acquisition task started");
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+    printf("Sensor acquisition task started\n");
     
     while (1) {
-        // Get sensor readings
         RawSensorData newData = sensorModule.readSensor();
-        
-        // Protect shared data with mutex
         if (xSemaphoreTake(dataMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
             rawData = newData;
             xSemaphoreGive(dataMutex);
         }
-        
-        // Precise timing using vTaskDelayUntil
         vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(SENSOR_ACQUISITION_INTERVAL_MS));
     }
 }
 
-// Task for signal processing
 void signalProcessingTask(void *pvParameters) {
-    // Add a small offset to avoid task overlap with acquisition
     vTaskDelay(pdMS_TO_TICKS(5));
-    
-    TickType_t xLastWakeTime;
-    xLastWakeTime = xTaskGetTickCount();
-    
-    Serial.println("Signal processing task started");
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+    printf("Signal processing task started\n");
     
     while (1) {
         RawSensorData currentRawData;
-        
-        // Get the latest raw data with mutex protection
         if (xSemaphoreTake(dataMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
             currentRawData = rawData;
             xSemaphoreGive(dataMutex);
         }
-        
-        // Apply salt and pepper filter
         ProcessedData filteredData = signalConditioner.applySaltPepperFilter(currentRawData);
-        
-        // Apply weighted average filter
         filteredData = signalConditioner.applyWeightedAverageFilter(filteredData);
-        
-        // Convert ADC to voltage and then to physical parameter
         PhysicalParameter param = converter.convertToPhysicalParameter(filteredData);
-        
-        // Apply saturation to ensure values are in valid range
         param = converter.applySaturation(param);
-        
-        // Update processed data with mutex protection
         if (xSemaphoreTake(dataMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
             processedData = filteredData;
             physicalParam = param;
             xSemaphoreGive(dataMutex);
         }
-        
-        // Precise timing
         vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(PROCESSING_INTERVAL_MS));
     }
 }
 
-// Display update task
 void displayUpdateTask(void *pvParameters) {
-    // Add a larger offset to avoid task overlap
     vTaskDelay(pdMS_TO_TICKS(50));
-
-    TickType_t xLastWakeTime;
-    xLastWakeTime = xTaskGetTickCount();
-    
-    Serial.println("Display update task started");
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+    printf("Display update task started\n");
     
     uint32_t reportCounter = 0;
-    
     while (1) {
         ProcessedData currentProcessedData;
         PhysicalParameter currentParam;
-        
-        // Get the latest processed data with mutex protection
         if (xSemaphoreTake(dataMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
             currentProcessedData = processedData;
             currentParam = physicalParam;
             xSemaphoreGive(dataMutex);
         }
-        
-        // Update display with current data
         displayManager.updateDisplay(currentProcessedData, currentParam);
-        
-        // Periodic detailed report
         reportCounter++;
         if (reportCounter >= 10) {  // Every 5 seconds (10 * 500ms)
-            Serial.println("\n--- Detailed Signal Report ---");
-            Serial.print("Raw ADC Value: ");
-            Serial.println(currentProcessedData.rawValue);
-            Serial.print("Filtered Value: ");
-            Serial.println(currentProcessedData.filteredValue);
-            Serial.print("Voltage: ");
-            Serial.print(currentProcessedData.voltage, 3);
-            Serial.println(" V");
-            Serial.print("Physical Parameter: ");
-            Serial.print(currentParam.value, 2);
-            Serial.print(" ");
-            Serial.println(currentParam.unit);
-            Serial.print("Signal Quality: ");
-            Serial.println(signalConditioner.getSignalQualityDescription());
-            Serial.println("----------------------------\n");
+            printf("\n--- Detailed Signal Report ---\n");
+            printf("Raw ADC Value: %d\n", currentProcessedData.rawValue);
+            printf("Filtered Value: %d\n", currentProcessedData.filteredValue);
+            printf("Voltage: %.3f V\n", currentProcessedData.voltage);
+            printf("Physical Parameter: %.2f %s\n", currentParam.value, currentParam.unit);
+            printf("Signal Quality: %s\n", signalConditioner.getSignalQualityDescription());
+            printf("----------------------------\n\n");
             reportCounter = 0;
         }
-        
-        // Precise timing
         vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(DISPLAY_UPDATE_INTERVAL_MS));
     }
 }

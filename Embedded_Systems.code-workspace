@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "NewEmbedded",
+			"path": "../../../PlatformIO/Projects/NewEmbedded"
+		}
+	],
+	"settings": {}
+}
