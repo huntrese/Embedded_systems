@@ -20,65 +20,17 @@
       "left": 464.6,
       "attrs": { "color": "red" }
     },
-    {
-      "type": "wokwi-led",
-      "id": "led2",
-      "top": -195.6,
-      "left": 618.2,
-      "attrs": { "color": "limegreen" }
-    },
-    {
-      "type": "wokwi-led",
-      "id": "led3",
-      "top": -195.6,
-      "left": 551,
-      "attrs": { "color": "yellow" }
-    },
+    { "type": "wokwi-relay-module", "id": "relay1", "top": -163, "left": 192, "attrs": {} },
     {
       "type": "wokwi-resistor",
       "id": "r1",
-      "top": -110.4,
-      "left": 460.25,
-      "rotate": 90,
-      "attrs": { "value": "220" }
-    },
-    {
-      "type": "wokwi-resistor",
-      "id": "r2",
-      "top": -120,
-      "left": 546.65,
-      "rotate": 90,
-      "attrs": { "value": "220" }
-    },
-    {
-      "type": "wokwi-resistor",
-      "id": "r3",
-      "top": -120,
-      "left": 613.85,
+      "top": -168,
+      "left": 498.65,
       "rotate": 90,
       "attrs": { "value": "220" }
     }
   ],
   "connections": [
-    [ "uno:13", "bb1:28b.g", "limegreen", [ "v0" ] ],
-    [ "uno:2", "bb1:12b.i", "red", [ "v0" ] ],
-    [ "bb1:tn.1", "uno:GND.1", "blue", [ "v-0.1", "h-286.4" ] ],
-    [ "led2:C", "bb1:tn.22", "green", [ "v0" ] ],
-    [ "led3:C", "bb1:tn.16", "green", [ "v0" ] ],
-    [ "bb1:21b.h", "uno:12", "gold", [ "v0", "h-451.2" ] ],
-    [ "bb1:11t.a", "bb1:tn.9", "green", [ "v0" ] ],
-    [ "led1:A", "bb1:12t.a", "", [ "$bb" ] ],
-    [ "led1:C", "bb1:11t.a", "", [ "$bb" ] ],
-    [ "led2:A", "bb1:28t.a", "", [ "$bb" ] ],
-    [ "led2:C", "bb1:27t.a", "", [ "$bb" ] ],
-    [ "led3:A", "bb1:21t.a", "", [ "$bb" ] ],
-    [ "led3:C", "bb1:20t.a", "", [ "$bb" ] ],
-    [ "r1:1", "bb1:12t.c", "", [ "$bb" ] ],
-    [ "r1:2", "bb1:12b.g", "", [ "$bb" ] ],
-    [ "r2:1", "bb1:21t.b", "", [ "$bb" ] ],
-    [ "r2:2", "bb1:21b.f", "", [ "$bb" ] ],
-    [ "r3:1", "bb1:28t.b", "", [ "$bb" ] ],
-    [ "r3:2", "bb1:28b.f", "", [ "$bb" ] ],
     [ "uno:11", "keypad1:C4", "white", [ "v-28.8", "h-153", "v326.4", "h556.8" ] ],
     [ "keypad1:C3", "uno:10", "white", [ "v28.8", "h-556.95", "v-345.6", "h172.8" ] ],
     [ "uno:9", "keypad1:C2", "white", [ "v-48", "h-191.2", "v364.8", "h556.8" ] ],
@@ -90,7 +42,18 @@
     [ "lcd1:SCL", "uno:A5.2", "gray", [ "h0" ] ],
     [ "lcd1:SDA", "uno:A4.2", "purple", [ "h0" ] ],
     [ "lcd1:VCC", "uno:5V", "red", [ "h-489.6", "v787.3", "h249.6" ] ],
-    [ "uno:GND.2", "lcd1:GND", "blue", [ "v211.1", "h-274.5", "v-585.6", "h0", "v-220.8" ] ]
+    [ "uno:GND.2", "lcd1:GND", "blue", [ "v211.1", "h-274.5", "v-585.6", "h0", "v-220.8" ] ],
+    [ "relay1:VCC", "uno:5V", "red", [ "h-297.6", "v364.8", "h0", "v249.6", "h249.6" ] ],
+    [ "relay1:GND", "uno:GND.2", "blue", [ "h-307.2", "v306.8", "h0", "v307.2", "h268.8" ] ],
+    [ "uno:13", "relay1:IN", "gold", [ "v0" ] ],
+    [ "led1:A", "bb1:12t.a", "", [ "$bb" ] ],
+    [ "led1:C", "bb1:11t.a", "", [ "$bb" ] ],
+    [ "relay1:COM", "uno:GND.1", "blue", [ "h20.4", "v37", "h-220.8" ] ],
+    [ "relay1:NO", "bb1:11t.d", "violet", [ "h0" ] ],
+    [ "r1:1", "bb1:tp.13", "", [ "$bb" ] ],
+    [ "r1:2", "bb1:16t.c", "", [ "$bb" ] ],
+    [ "bb1:16t.d", "bb1:12t.d", "red", [ "v0" ] ],
+    [ "bb1:tp.1", "uno:3.3V", "#8f4814", [ "v0.3", "h-56", "v508.8", "h-28.8" ] ]
   ],
   "dependencies": {}
 }

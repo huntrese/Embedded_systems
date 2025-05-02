@@ -1,5 +1,5 @@
 [wokwi]
 
 
-firmware = '.pio/build/uno/firmware.hex'
-elf = '.pio/build/uno/firmware.elf'
+firmware = '.pio/build/your_board/firmware.hex'
+elf = '.pio/build/your_board/firmware.elf'
