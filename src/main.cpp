@@ -1,186 +1,141 @@
-#include <Arduino.h>
-#include "io.h"
-#include "Logger.h"
-#include "LedManager.h"
-#include "map"
-#include "TimerConfigs.h"
+// main.cpp
+#include "Arduino.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/semphr.h"
+#include "SensorModule.h"
+#include "SignalConditioner.h"
+#include "ConversionModule.h"
+#include "DisplayModule.h"
 
-#define KEYPAD_PIN 4     // First pin for keypad (needs 8 consecutive pins)
-#define LCD_ADDRESS 0x27 // I2C address for LCD
-#define LCD_COLS 16      // LCD columns
-#define LCD_ROWS 2       // LCD rows
-#define GREEN_LED 13     // Success LED
-#define RED_LED 12       // Error LED
-#define OTHER_LED 2      // Other LED
+// Task handles
+TaskHandle_t sensorTaskHandle = NULL;
+TaskHandle_t processingTaskHandle = NULL;
+TaskHandle_t displayTaskHandle = NULL;
 
-uint16_t timerMultiple = 0;
-std::map<int, std::map<String, int>> dict;
-volatile int green_led_state = 0;
+// Constants
+constexpr int SENSOR_TASK_STACK_SIZE = 2048;
+constexpr int PROCESSING_TASK_STACK_SIZE = 2048;
+constexpr int DISPLAY_TASK_STACK_SIZE = 2048;
+constexpr int SENSOR_TASK_PRIORITY = 3;
+constexpr int PROCESSING_TASK_PRIORITY = 2;
+constexpr int DISPLAY_TASK_PRIORITY = 1;
+constexpr int SENSOR_ACQUISITION_INTERVAL_MS = 10;  // 10ms sensor acquisition
+constexpr int PROCESSING_INTERVAL_MS = 20;          // 20ms signal processing
+constexpr int DISPLAY_UPDATE_INTERVAL_MS = 500;     // 500ms display update
 
-// in ms
-volatile int taskA_rec = 500;
-volatile int taskA_offset = 1000;
-volatile int taskA_cnt = taskA_offset;
+// Create instances of modules
+SensorModule sensorModule;
+SignalConditioningModule signalConditioner;
+ConversionModule converter;
+DisplayModule displayManager;
 
-volatile int taskB_rec = 50;
-volatile int taskB_offset = 200;
-volatile int taskB_cnt = taskB_offset;
+// Task functions
+void sensorAcquisitionTask(void *pvParameters);
+void signalProcessingTask(void *pvParameters);
+void displayUpdateTask(void *pvParameters);
 
-volatile int taskC_rec = 25;
-volatile int taskC_offset = 300;
-volatile int taskC_cnt = taskC_offset;
+// Shared data structures with mutex protection
+SemaphoreHandle_t dataMutex;
+RawSensorData rawData;
+ProcessedData processedData;
+PhysicalParameter physicalParam;
 
-volatile int RED_LED_interval = 250;
-volatile char c;
+void setup() {
+    // Initialize Serial communication
+    Serial.begin(115200);
+    delay(1000); // Give some time for serial to initialize
+    
+    printf("Starting Signal Conditioning Lab...\n");
 
-void setup()
-{
+    // Initialize mutex for data protection
+    dataMutex = xSemaphoreCreateMutex();
 
-    Serial.begin(9600);
+    // Initialize modules
+    sensorModule.init();
+    signalConditioner.init();
+    converter.init();
+    displayManager.init();
 
-    IO::init(IO::LCD_KEYPAD_MODE);
-    IO::initKeypad(KEYPAD_PIN);
-    IO::initLCD(LCD_ADDRESS, LCD_COLS, LCD_ROWS);
+    // Initialize the onboard LED
+    pinMode(2, OUTPUT);
 
-    setTimerInterval(1, 50, 'm'); // Timer1: 50 milliseconds
-    setTimerInterval(2, 1, 'm');  // Timer2: 1 milisecond
+    // Create tasks with offsets to avoid overlap
+    xTaskCreate(sensorAcquisitionTask, "SensorTask", SENSOR_TASK_STACK_SIZE, NULL, SENSOR_TASK_PRIORITY, &sensorTaskHandle);
+    xTaskCreate(signalProcessingTask, "ProcessingTask", PROCESSING_TASK_STACK_SIZE, NULL, PROCESSING_TASK_PRIORITY, &processingTaskHandle);
+    xTaskCreate(displayUpdateTask, "DisplayTask", DISPLAY_TASK_STACK_SIZE, NULL, DISPLAY_TASK_PRIORITY, &displayTaskHandle);
 
-    pinMode(GREEN_LED, OUTPUT);
-    pinMode(RED_LED, OUTPUT);
-    pinMode(OTHER_LED, OUTPUT);
-
-    cli(); // Disable interrupts during setup
-    TCCR1A = 0;
-    TCCR1B = 0;
-    TCCR1B |= B00000101;   // Set prescaler to 1024
-    TIMSK1 |= B00000010;   // Enable compare match interrupt (OCIE1A)
-    OCR1A = TIMER1_PULSES; // Set compare match register A
-
-    TCCR2A = 0;
-    TCCR2B = 0;
-    TCCR2B |= B00000011;   // Set prescaler to 64
-    TIMSK2 |= B00000010;   // Enable compare match interrupt (OCIE2A)
-    OCR2A = TIMER2_PULSES; // Set compare match register A
-
-    sei(); // Enable interrupts
-
-    Logger::printf("Timer1 Count: %d", TIMER1_COUNT);
-    Logger::printf("Timer2 Count: %d", TIMER2_COUNT);
-
-    LedManager::blink_init(dict, 50);
-
+    printf("All tasks initialized and started\n");
 }
 
-void blink_check_new()
-{
-    timerMultiple++;
-    int elapsedTime = TIMER1_INTERVAL_MS * timerMultiple;
-
-    for (auto &pin_data : dict)
-    {
-        // .first - key .second - value
-
-        if (elapsedTime % pin_data.second["interval"] == 0)
-        {
-            LedManager::toggle(pin_data.first);
-
-            if (pin_data.second["times"] > 0)
-            {
-                pin_data.second["times"] -= 1;
-            }
-
-            if (pin_data.second["times"] == 0)
-            {
-                dict.erase(pin_data.first);
-            }
+void loop() {
+    // Empty - FreeRTOS manages task execution
+    vTaskDelay(1000 / portTICK_PERIOD_MS); // Prevent watchdog timeout
+}
+void sensorAcquisitionTask(void *pvParameters) {
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+    printf("Sensor acquisition task started\n");
+    
+    while (1) {
+        RawSensorData newData = sensorModule.readSensor();
+        if (xSemaphoreTake(dataMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+            rawData = newData;
+            xSemaphoreGive(dataMutex);
         }
-    }
-
-    if (timerMultiple >= TIMER1_COUNT)
-    {
-        timerMultiple = 0;
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(SENSOR_ACQUISITION_INTERVAL_MS));
     }
 }
 
-void loop()
-{
-    c = (volatile char)getchar();
-    IO::clearLCD();
-
-    // Idle time
-    printf("A:%d B:%d C:%d\n",taskA_cnt,taskB_cnt,taskC_cnt);
-    printf("Green:%d Red:%d\n", green_led_state,RED_LED_interval);
-}
-
-void taskA()
-{
-    if (c == '1')
-    {
-        LedManager::toggle(GREEN_LED);
-        green_led_state = !green_led_state;
-        Logger::printf("%d", green_led_state);
-        c = '\0';
-    }
-}
-void taskB()
-{
-    if (!green_led_state)
-    {
-        LedManager::blink(dict, RED_LED, -1, RED_LED_interval);
-    }
-    else
-    {
-        dict.erase(RED_LED);
-        LedManager::off(RED_LED);
-    }
-}
-void taskC()
-{
-    if (c == '2')
-    {
-        c = '\0';
-        if (RED_LED_interval <= 50)
-        {
-            Logger::printf("Already at min spd.");
-
-            return;
+void signalProcessingTask(void *pvParameters) {
+    vTaskDelay(pdMS_TO_TICKS(5));
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+    printf("Signal processing task started\n");
+    
+    while (1) {
+        RawSensorData currentRawData;
+        if (xSemaphoreTake(dataMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+            currentRawData = rawData;
+            xSemaphoreGive(dataMutex);
         }
-        RED_LED_interval -= 50;
-    }
-    if (c == '3')
-    {
-        c = '\0';
-
-        if (RED_LED_interval >= 950)
-        {
-            Logger::printf("Already at max spd.");
-            return;
+        ProcessedData filteredData = signalConditioner.applySaltPepperFilter(currentRawData);
+        filteredData = signalConditioner.applyWeightedAverageFilter(filteredData);
+        PhysicalParameter param = converter.convertToPhysicalParameter(filteredData);
+        param = converter.applySaturation(param);
+        if (xSemaphoreTake(dataMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+            processedData = filteredData;
+            physicalParam = param;
+            xSemaphoreGive(dataMutex);
         }
-        RED_LED_interval += 50;
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(PROCESSING_INTERVAL_MS));
     }
-}
-ISR(TIMER1_COMPA_vect)
-{
-    blink_check_new();
-    TCNT1 = 0;
 }
 
-ISR(TIMER2_COMPA_vect)
-{
-    if (--taskA_cnt == 0)
-    {
-        taskA();
-        taskA_cnt = taskA_rec;
+void displayUpdateTask(void *pvParameters) {
+    vTaskDelay(pdMS_TO_TICKS(50));
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+    printf("Display update task started\n");
+    
+    uint32_t reportCounter = 0;
+    while (1) {
+        ProcessedData currentProcessedData;
+        PhysicalParameter currentParam;
+        if (xSemaphoreTake(dataMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+            currentProcessedData = processedData;
+            currentParam = physicalParam;
+            xSemaphoreGive(dataMutex);
+        }
+        displayManager.updateDisplay(currentProcessedData, currentParam);
+        reportCounter++;
+        if (reportCounter >= 10) {  // Every 5 seconds (10 * 500ms)
+            printf("\n--- Detailed Signal Report ---\n");
+            printf("Raw ADC Value: %d\n", currentProcessedData.rawValue);
+            printf("Filtered Value: %d\n", currentProcessedData.filteredValue);
+            printf("Voltage: %.3f V\n", currentProcessedData.voltage);
+            printf("Physical Parameter: %.2f %s\n", currentParam.value, currentParam.unit);
+            printf("Signal Quality: %s\n", signalConditioner.getSignalQualityDescription());
+            printf("----------------------------\n\n");
+            reportCounter = 0;
+        }
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(DISPLAY_UPDATE_INTERVAL_MS));
     }
-    if (--taskB_cnt == 0)
-    {
-        taskB();
-        taskB_cnt = taskB_rec;
-    }
-    if (--taskC_cnt == 0)
-    {
-        taskC();
-        taskC_cnt = taskC_rec;
-    }
-    TCNT2 = 0;
 }
