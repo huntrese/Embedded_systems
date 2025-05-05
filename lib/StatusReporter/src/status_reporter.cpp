@@ -36,9 +36,6 @@
          lcd_i2c_print("DC Motor Control");
          lcd_i2c_set_cursor(0, 1);
          lcd_i2c_print("Power: 0%");
-     } else {
-         // Handle LCD initialization failure
-         Serial.println("LCD initialization failed!");
      }
      
      return lcd_ok;
@@ -57,14 +54,14 @@
          _last_reported_direction = current_direction;
          
          // Report to serial
-         printf("Motor status: ");
+         Serial.print("Motor status: ");
          if (current_power == 0) {
-             printf("STOPPED\n");
+             Serial.println("STOPPED");
          } else {
-             printf(current_direction > 0 ? "FORWARD" : "REVERSE");
-             printf(", Power: ");
-             printf("%d",abs(current_power));
-             printf("%\n");
+             Serial.print(current_direction > 0 ? "FORWARD" : "REVERSE");
+             Serial.print(", Power: ");
+             Serial.print(abs(current_power));
+             Serial.println("%");
          }
          
          // Report to LCD

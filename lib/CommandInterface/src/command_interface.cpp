@@ -17,13 +17,14 @@
  bool command_interface_init(void) {
      // Initialize serial for command input
      Serial.begin(115200);
-     printf("\nDC Motor Control System");
-     printf("\nCommands:");
-     printf("\n  motor set [-100..100] - Set motor power");
-     printf("\n  motor stop - Stop motor");
-     printf("\n  motor max - Maximum power");
-     printf("\n  motor inc - Increase power");
-     printf("\n  motor dec - Decrease power\n");
+     Serial.println("DC Motor Control System");
+     Serial.println("Commands:");
+     Serial.println("  motor set [-100..100] - Set motor power");
+     Serial.println("  motor stop - Stop motor");
+     Serial.println("  motor max - Maximum power");
+     Serial.println("  motor inc - Increase power");
+     Serial.println("  motor dec - Decrease power");
+     Serial.println();
      
      return true;
  }
@@ -79,19 +80,19 @@
              if (motor_set_power(power)) {
                  status_report_immediate();
              } else {
-                 printf("\nError: Power value must be between -100 and 100");
+                 Serial.println("Error: Power value must be between -100 and 100");
              }
          } 
          else if (strcmp(args[1], "stop") == 0) {
              // Stop motor
              motor_stop();
-             printf("\nMotor stopped");
+             Serial.println("Motor stopped");
              status_report_immediate();
          }
          else if (strcmp(args[1], "max") == 0) {
              // Max power
              motor_set_max();
-             printf("\nMotor set to maximum power");
+             Serial.println("Motor set to maximum power");
              status_report_immediate();
          }
          else if (strcmp(args[1], "inc") == 0) {
@@ -100,7 +101,7 @@
              
              // Additional behavior - show message at max power
              if (abs(new_power) == 100) {
-                 printf("\nMaximum power reached!");
+                 Serial.println("Maximum power reached!");
              } else {
                  Serial.print("Power increased to ");
                  Serial.println(new_power);
@@ -114,7 +115,7 @@
              
              // Additional behavior - show message at min power
              if (new_power == 0) {
-                 printf("\nMinimum power reached - motor stopped");
+                 Serial.println("Minimum power reached - motor stopped");
              } else {
                  Serial.print("Power decreased to ");
                  Serial.println(new_power);
@@ -123,10 +124,10 @@
              status_report_immediate();
          }
          else {
-             printf("\nUnknown motor command");
+             Serial.println("Unknown motor command");
          }
      } else {
-         printf("\nUnknown command");
+         Serial.println("Unknown command");
      }
      
      // Reset buffer for next command
